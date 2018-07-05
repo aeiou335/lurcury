@@ -1,0 +1,40 @@
+1. 產生創世區塊
+genesis.py
+2. 蒐集交易數據
+transaction.py(newTransaction 缺txid)
+function 存儲新交易於節點資料庫內(未驗證的)
+
+
+#pending transaction
+#[{'fee': '1', 'publicKey': 'e087f634b8e830b999242038a8e82953450fe522b461a9945c0fff4d0d8645985ddda00b481b93f8cc048cbfe3e9d3eb', 'nonce': '000000000000000000000000000001', 'to': 'cxfcb42deca97e4e8339e0b950ba5efa368fe71a55', 'out': {'now': '100', 'cic': '10'}, 'sign': b'5de4a5d06ebfdedf8f2fdf05ecfa2cd7e90a817da28260b779c101e8922d6bbeab0fdee795e13fa09e6755c07316440e'}.{'fee': '2', 'publicKey': 'e087f634b8e830b999242038a8e82953450fe522b461a9945c0fff4d0d8645985ddda00b481b93f8cc048cbfe3e9d3eb', 'nonce': '000000000000000000000000000001', 'to': 'cxfcb42deca97e4e8339e0b950ba5efa368fe71a55', 'out': {'now': '100', 'cic': '10'}, 'sign': b'5de4a5d06ebfdedf8f2fdf05ecfa2cd7e90a817da28260b779c101e8922d6bbeab0fdee795e13fa09e6755c07316440e'}]
+#無法確認交易手續費跟處理優先度
+#用完後刪除
+
+3. 驗證交易
+
+從pending transaction撈手續費較高者
+驗證簽章
+驗證balance
+驗證nonce
+驗證完成包入區塊內
+#transaction
+#{txid:"0x37513d059944dee6287750d0cba41fff6f176500a843453b70da9998d0ea1ca5"}
+
+verify transaction
+{txid:"0x37513d059944dee6287750d0cba41fff6f176500a843453b70da9998d0ea1ca5"}
+根據txid的資料更改資料庫各個地址代幣餘額
+計算手續費，手續費轉入礦工地址，更改nonce
+
+--分岔後回溯問題
+4. 包入區塊內
+push 進入blockData
+每個2-5秒產生新區塊
+
+確認包入區塊鏈的txid
+
+
+5. 產生新區塊
+newBlock_POA
+#缺 push txid 進入transaction:[]
+
+

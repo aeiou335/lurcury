@@ -1,0 +1,41 @@
+import sys
+sys.path.append("../crypto")
+from basic import *#Hash_c
+from genesis import *#Hash_c
+#print(Hash_c.sha256_string(""))
+#print(Genesis.genesis())
+from transactionCode import Code
+
+
+class Block:
+    def newBlock_POA(parentblock,key):
+        blockData = {
+            "version":"sue",
+            "config":
+                {
+                    "version":"init"
+                },
+            "blockNumber" : "",
+            "timestamp":time.time(),
+            "hash":"",
+            "extraData":"",
+            "ParentHash":"",
+            "verify":[],
+            "transaction":[]
+        }
+        blockData["ParentHash"]= parentblock["hash"]
+        blockData["hash"]= Hash_c.sha256_string(str(blockData))
+        blockData["blockNumber"]= str(int(parentblock["blockNumber"])+1)
+        pub = Key_c.publicKey(key)
+        sign = signature_c.sign(Hash_c.sha256_string(str(blockData)),key)
+        blockData["verify"].append({pub:signature_c.sign(Hash_c.sha256_string(str(blockData)),key)})
+        #print(Key_c.publicKey(key))
+        #print(blockData["verify"])
+        return blockData
+    def verifyBlock(transaction):
+        #consensus
+        return 0
+
+
+print(Block.newBlock_POA(Genesis.genesis(),"24ac4b12bbb37e5b1e59830c7e376f1963b9cacb4233fa53"))
+#Block.transactionDecode("000000000000000000000000000001cxfcb42deca97e4e8339e0b950ba5efa368fe71a55000000000000000000000000000001now000000000000000000000000000100cic000000000000000000000000000010")
