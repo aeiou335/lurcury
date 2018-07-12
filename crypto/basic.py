@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from __future__ import with_statement, division
 import eth_keys, eth_utils, binascii, os
 
@@ -79,4 +80,5 @@ print(r)
 
 #x = signature_c.sign("blahblah","f8b9fc996979291ac2968faeaedd88cd4c2fbc5611fda0605415e05eafc6658a")
 #print(x)
+
 
