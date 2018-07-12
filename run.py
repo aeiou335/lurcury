@@ -28,7 +28,7 @@ def main():
 		fntdb.createBlock(genesisBlock)
 	else:
 		#while True:
-		for j in range(1):
+		for j in range(2):
 			time.sleep(2)
 			newBlock = Block.block()
 			for i in range(5):
@@ -61,17 +61,16 @@ def main():
 				print('Error occurs when saving block into db.')
 				continue
 			#fntdb.updateDBAccountStatus(newBlock)
-			"""
+			
 			transactions = newBlock['transaction']
 			if len(transactions) == 0:
 				continue
 			for transaction in transactions:
-				if not fntdb.updateBalanceAndNonce(transaction):
-					print('Something wrong when updating account status.')
-			"""
-
-
-
+				try:
+					fntdb.createTransaction(transaction)
+				except:
+					print("Error occurs when saving transaction into db.")
+					continue
 
 #getBlockNumber
 #if(blockNumber == null):

@@ -8,7 +8,7 @@ from six import b, print_, binary_type
 import sys
 sys.path.append("../")
 from ecdsa import SigningKey, VerifyingKey
-class Hash_c:
+class hash_c:
     def sha256_string(data):
         data = bytes(data,"utf8")
         m = hashlib.sha256()
@@ -29,7 +29,7 @@ class Hash_c:
         return r
     '''
 
-class Key_c:
+class key_c:
     def privateKey():
         priv = SigningKey.generate()
         priv_hex=(priv.to_string()).hex()
@@ -40,14 +40,13 @@ class Key_c:
         pub_hex=(pub.to_string()).hex()
         return pub_hex
     def address(pub):
-        r = "cx"+Hash_c.sha256_string(pub)[24:64]
+        r = "cx"+hash.sha256_string(pub)[24:64]
         return r
     def exp():
-        f = Key_c.privateKey()
-        f2 = Key_c.publicKey(f)
-        f3 = Key_c.address(f2)
-        #print("key",f,"pub",f2,"addr",f3)
-        return (f,f2,f3)
+        f = key.privateKey()
+        f2 = key.publicKey(f)
+        f3 = key.address(f2)
+        print("key",f,"pub",f2,"addr",f3)
 
 class signature_c:
     def sign(data,priv):

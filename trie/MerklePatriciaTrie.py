@@ -16,10 +16,11 @@ class MerklePatriciaTrie:
         self.root = ""
         self.id = self.getCurrentNum()
         self.initial_root_hash(_root_hash)
-    
+        
     def initial_root_hash(self,root):
         if root == "":
             return ""
+        print('root:', root)
         node = self.db.get(root)
         self.root = pickle.loads(node)
 

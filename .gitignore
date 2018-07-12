@@ -1,0 +1,6 @@
+trie/balanceDB
+trie/blockDB
+trie/rootDB
+trie/transactionDB
+trie/testdb
+trie/btcRelayDB

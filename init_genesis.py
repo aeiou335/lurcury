@@ -32,16 +32,16 @@ for i in range(10):
 	transaction = {}
 	transaction['fee'] = '1000'
 	transaction['to'] = 'cx' + ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(38))
-	transaction['out'] = {'cic':str(random.randint(10,60)),'now':str(random.randint(5,20))}
+	transaction['out'] = {'cic':str(random.randint(10,20)),'now':str(random.randint(5,10))}
 	transaction['nonce'] = str(i+1)
-	#transaction = Transaction.newTransaction(transaction, key)
-	#print(transaction)
+	transaction = Transaction.newTransaction(transaction, key)
+	print(transaction)
 	
 	#print(transaction['txid'])
 	transactions.append(transaction)
 	data = {'method':'sendTransaction', 'param':[transaction]}
 	headers = {'Content-Type':'application/json'}
-	r = requests.post('http://192.168.0.38:9000', headers = headers, data = json.dumps(data))
+	r = requests.post('http://192.168.51.201:9000', headers = headers, data = json.dumps(data))
 	#print(r.text)
 print((time.time()-t))
 """
