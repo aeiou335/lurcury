@@ -1,16 +1,24 @@
 import requests 
+import threading
 import json 
 import pickle
 import pysql
+import queue
 from collections import defaultdict
 import sys
 sys.path.append('trie')
 import db as db
 import MerklePatriciaTrie as MPT 
 
+SHARED_Q = queue.Queue()
+for j in range(10000):
+	SHARED_Q.put(j)
+print(SHARED_Q.qsize())
+
 class bitcoinInfo: 
 	def blockInfo(num): 
 		r = requests.get("https://blockexplorer.com/api/block-index/"+num) 
+		#print(r.text)
 		z = json.loads(r.text[:1000000000]) 
 		#print(z["blockHash"]) 
 		t = requests.get("https://blockexplorer.com/api/block/"+z["blockHash"]) 
@@ -27,7 +35,7 @@ class bitcoinInfo:
 		value = 0
 		address = ""
 		for i, transaction in enumerate(transactions):
-			print(transaction)
+			#print(transaction)
 			if i < len(transactions)-1:
 				if transaction["scriptPubKey"]["addresses"][0] != ourAccount:
 					continue
@@ -57,7 +65,7 @@ class bitcoinInfo:
 		r = bitcoinInfo.blockInfo("300000") 
 		#print(r) 
 		z = json.loads(r) 
-		print('haha',z["tx"])
+		#print('haha',z["tx"])
 		btcRelayDB = db.DB("trie/btcRelayDB")
 		rootDB = db.Db("trie/rootDB")
 		try:
@@ -73,42 +81,99 @@ class bitcoinInfo:
 				trie.update(y['txid'], y)
 		new_root = trie.root_hash()
 		rootDB.put(b"btcRelaytrie", new_root)
-#_hash, height, merkleroot, tx, _time, previousblockhash, difficulty, reward
-def block():
-	x
+
+class thread(threading.Thread):
+	def __init__(self, threadID, name, sql, conn, threadLock):
+		threading.Thread.__init__(self)
+		self.threadID = threadID
+		self.name = name
+		self.sql = sql
+		self.conn = conn
+		self.lock = threadLock
+	def run(self):
+		while SHARED_Q.qsize() > 0:
+			num = SHARED_Q.get()
+			self.lock.acquire()
+			info = json.loads(bitcoinInfo.blockInfo(str(num)))
+			self.lock.release()
+			parseBlock(info, self.sql, self.conn)
+
+def parseBlock(info, sql, conn):
+	print(info['height'])
+	#print(blocknum)
+	#try:
+	#print(bitcoinInfo.blockInfo(str(blocknum)))
+	#info = json.loads(bitcoinInfo.blockInfo(str(blocknum)))
+	#except:
+	#	parseBlock(blocknum, sql, conn)
+	#	return 0
+	_hash = info['hash']
+	height = info['height']
+	merkleroot = info['merkleroot']
+	tx = info['tx']
+	time = info['time']
+	previousblockhash = info['previousblockhash']
+	difficulty = info['difficulty']
+	#print(_hash, height, merkleroot, tx, time, previousblockhash, difficulty)
+	pysql.updateBlockStatus(conn, _hash, height, merkleroot, tx, time, previousblockhash, difficulty)
+	for t in tx:
+		r = requests.get("https://blockexplorer.com/api/tx/"+t)
+		#print(r.text)
+		if 'Not found' not in r.text[:1000000000]:
+			tran = json.loads(r.text[:1000000000])
+			txid = tran['txid']
+			blockhash = tran['blockhash']
+			txtime = tran['time']
+			vins = tran['vin']
+			vouts = tran['vout']
+			pysql.updateTxStatus(conn, txid, blockhash, txtime)
+			for vin in vins:
+				vin_vout = 0; coinbase = ''; scriptSig_asm = ''; scriptSig_hex = ''; unspendtxid = ''
+				if 'coinbase' in vin:
+					coinbase = vin['coinbase']
+					sequence = vin['sequence']
+					#n = vin['n']
+				else:
+					unspendtxid = vin['txid']
+					vin_vout = vin['vout']
+					sequence = vin['sequence']
+					scriptSig = json.loads(vin['scriptSig'])
+					scriptSig_asm = scriptSig['asm']
+					scriptSig_hex = scriptSig['hex']
+				pysql.updateVinStatus(conn, unspendtxid, txid, coinbase, vin_vout, scriptSig_asm, scriptSig_hex, sequence)
+			#print(vin)
+			#print(vout)
+			#txid,[value],n,scriptPubKey_asm,scriptPubKey_hex,scriptPubKey_type,scriptPubKey_reqSigs,scriptPubKey_addresses
+			for vout in vouts:
+				value = vout['value']
+				n = vout['n']
+				#scriptPubKey = json.loads(vout['scriptPubKey'])
+				scriptPubKey = vout['scriptPubKey']
+				scriptPubKey_asm = scriptPubKey['asm']
+				scriptPubKey_hex = scriptPubKey['hex']
+				scriptPubKey_type = scriptPubKey['type']
+				scriptPubKey_addresses = scriptPubKey['addresses']
+				if 'scriptPubKey_reqSigs' in scriptPubKey:
+					scriptPubKey_reqSigs = scriptPubKey['scriptPubKey_reqSigs']
+				else:
+					scriptPubKey_reqSigs = ""
+				pysql.updateVoutStatus(conn, txid,value,n,scriptPubKey_asm,scriptPubKey_hex,scriptPubKey_type,scriptPubKey_reqSigs,scriptPubKey_addresses)
 		
+
 
 def main():
 	sql,conn = pysql.sqlcon('192.168.51.11','bc_developer','d!tRv36B','BlockChain')
-	num = 10
-	
-	for i in range(num):
-		print(i)
-		info = json.loads(bitcoinInfo.blockInfo(str(i)))
-		_hash = info['hash']
-		height = info['height']
-		merkleroot = info['merkleroot']
-		tx = info['tx']
-		time = info['time']
-		previousblockhash = info['previousblockhash']
-		difficulty = info['difficulty']
-		pysql.updateBlockStatus(conn, _hash, height, merkleroot, tx, time, previousblockhash, difficulty)
-		for t in tx:
-			r = requests.get("https://blockexplorer.com/api/tx/"+t)
-			print(r.text)
-			if 'Not found' not in r.text[:1000000000]:
-				tran = json.loads(r.text[:1000000000])
-				txid = tran['txid']
-				blockhash = tran['blockhash']
-				time = tran['time']
-				vin = tran['vin']
-				vout = tran['vout']
-				print(vin)
-				print(vout)
-		
-	#pysql.updateBlockStatus(conn,'00000000de1250dc2df5cf4d877e055f338d6ed1ab504d5b71c097cdccd00e13',30000,'37be054a52112c5f8d2c06d965813a63cc8bd1598133836aec883914c5cf14a7','37be054a52112c5f8d2c06d965813a63cc8bd1598133836aec883914c5cf14a7',1261007544,'00000000b3cc5384f93014f783d86d6e209ad5ca7dc5a613c4f994fa984168c6',1)
-	#pysql.updateBlockStatus(conn, '1000',3,'4','5',6,'7',8)
-	print(pysql.selectBlockStatus(sql))
+	threads = []
+	threadLock = threading.Lock()
+	for i in range(50):
+		threads.append(thread(i, "thread_{}".format(i), sql, conn, threadLock))
+	for t in threads:
+		t.start()
+	print("Current Threads:", threading.active_count())
+	#print(pysql.selectStatus(sql, "block"))
+	#print(pysql.selectStatus(sql, "transaction"))
+	#print(pysql.selectStatus(sql, "transaction_vin"))
+	#print(pysql.selectStatus(sql, "transaction_vout"))
 if __name__ == '__main__':
 	main()
 
