@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from __future__ import with_statement, division
 import eth_keys, eth_utils, binascii, os
 
@@ -35,13 +36,16 @@ class Key_c:
         priv = SigningKey.generate(curve=SECP256k1)
         priv_hex=(priv.to_string()).hex()
         return priv_hex
-    def publicKey(priv): 
-        signkey = SigningKey.from_string(bytes().fromhex(priv), curve=SECP256k1) 
-        verkey = signkey.get_verifying_key() 
-        pubkey = binascii.hexlify(verkey.to_string()) #pubkey 
-        #privKey = eth_keys.keys.PrivateKey(binascii.unhexlify(priv)) 
-        #pubKey = privKey.public_key 
-        return pubkey.decode()
+    def publicKey(priv):
+        '''
+        priv = SigningKey.from_string(bytes().fromhex(priv))
+        pub = priv.get_verifying_key()
+        pub_hex=(pub.to_string()).hex()
+        return pub_hex
+        '''
+        privKey = eth_keys.keys.PrivateKey(binascii.unhexlify(priv))
+        pubKey = privKey.public_key
+        return pubKey
     def address(pub):
         r = "cx"+Hash_c.sha256_string(pub)[24:64]
         #r = pub.to_checksum_address()
