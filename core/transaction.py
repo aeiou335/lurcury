@@ -115,7 +115,7 @@ transaction = {
     "fee":"1"
 }
 x = Transaction.newTransaction(Transaction.newTransaction(transaction,"97ddae0f3a25b92268175400149d65d6887b9cefaf28ea2c078e05cdc15a3c0a"),"97ddae0f3a25b92268175400149d65d6887b9cefaf28ea2c078e05cdc15a3c0a")
-
+print(x)
 print(x)
 
 print(Code.transactionEncode(x))
