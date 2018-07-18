@@ -10,12 +10,20 @@ class Code:
         trans = transaction
         re = ""
         reToken= ""
+        for coin in trans['out']:
+            v = trans['out'][coin]
+            for h in range(0,30-len(trans['out'][coin])):
+                #v = trans['out'][coin]
+                v="0"+v
+            reToken = reToken + coin + v
+        '''
         for coin in coins:
             if coin in trans['out']:
                 v = trans['out'][coin]
                 for h in range(0,30-len(trans['out'][coin])):
                     v="0"+v
             reToken = reToken + coin + v
+        '''
         """
         for i,v in trans["out"].items():
             #print(v)
