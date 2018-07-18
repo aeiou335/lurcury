@@ -36,12 +36,14 @@ class Code:
         for x in range(0,30-len(trans["nonce"])):
             trans["nonce"]="0"+trans["nonce"]
         re = re+trans["nonce"]
-        re = re+trans["to"]
+        #lenth = len(trans["to"])
+        #re = re+str(len(trans["to"]))+trans["to"]
         #re = re+transaction["nonce"]
         for z in range(0,30-len(trans["fee"])):
             trans["fee"]="0"+trans["fee"]
         re = re+trans["fee"]
         re = re+reToken
+        re = re+str(len(trans["to"]))+trans["to"]
         #print(re)
         return re
     #newTransaction
@@ -71,16 +73,24 @@ class Code:
     def transactionDecode(transaction):
         re = {}
         re["nonce"] = str(int(transaction[0:30]))
-        re["to"] = transaction[30:72]
+        #re["to"] = transaction[30:72]
 
-        re["fee"] = str(int(transaction[72:102]))
+        re["fee"] = str(int(transaction[30:60]))
         re["out"]=[]
         outjson = {}
-        for t in range(0,int(len(transaction[102:])/33)):
+        '''
+        for t in range(0,int(len(transaction[60:])/33)):
             p = t*33
             #re["out"].append({transaction[102+p:105+p]:str(int(transaction[105+p:135+p]))})
             outjson[transaction[102+p:105+p]] = str(int(transaction[105+p:135+p]))
-        re["out"] = outjson
+        '''
+        #print("test",transaction[60:63])
+        #re["out"].append({"test":"123"})
+        re["out"].append({transaction[60:63]:str(int(transaction[63:93]))})
+        toint = int(transaction[93:95])
+        print(toint)
+        re["to"] = transaction[95:95+toint]
+        #re["out"] = outjson
         #print("ch",re)
         #print("ch",transaction)
         return re
@@ -109,7 +119,8 @@ class Transaction:
         return True
 
 transaction = {
-    "to":"cxfcb42deca97e4e8339e0b950ba5efa368fe71a55",
+    #"to":"cxfcb42deca97e4e8339e0b950ba5efa368fe71a55",
+    "to":"16YvcZqzg526o7Q52R9Td4SRYGGmjTPUD7",
     "out":{"ttt":"10"},
     "nonce":"1",
     "fee":"1"
