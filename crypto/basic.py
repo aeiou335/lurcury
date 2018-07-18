@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 from __future__ import with_statement, division
 import eth_keys, eth_utils, binascii, os
 
