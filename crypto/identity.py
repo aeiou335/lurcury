@@ -78,6 +78,17 @@ class identity:
     def get_addr(self):
         return str(self.addr, 'ascii')
 
+def pub2addr(key): #input string, output string
+    pubkey = b"04" + b(key)
+    ripemd = hashlib.new('ripemd160')
+    ripemd.update(hashlib.sha256(binascii.unhexlify(pubkey)).digest())
+    key = ripemd.digest()
+    key = b"00" + binascii.hexlify(key)
+    hash_key = binascii.unhexlify(key)
+    checksum = hashlib.sha256(hashlib.sha256(hash_key).digest()).digest()[:4]
+    key = key + binascii.hexlify(checksum)
+    return str(base58.b58encode(binascii.unhexlify(key)),'ascii')
+
 
 # unit tests
 if __name__ == "__main__":
@@ -94,11 +105,15 @@ if __name__ == "__main__":
     unit = identity(wif=pk)
     print("private key: ", unit.get_privkey())
     print("private wif: ", unit.get_wifkey())
-    print("public key: ", unit.get_pubkey())
+    pb = unit.get_pubkey()
+    print("public key: ", pb)#unit.get_pubkey())
     print("address:", unit.get_addr())
-    sig = unit.sign_data(data)
-    print("signed data: ", str(sig, 'ascii'))
-    print("verifying: ", unit.verify_data(sig, data))
+    addr = pub2addr(pb)
+    print("testing pub2addr: ", addr)
+    
+    #sig = unit.sign_data(data)
+    #print("signed data: ", str(sig, 'ascii'))
+    #print("verifying: ", unit.verify_data(sig, data))
 
     # test2: input 32 bytes string
     '''
