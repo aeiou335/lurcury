@@ -81,7 +81,7 @@ class Transaction:
     def newTransaction(transactionData,key):
         en = Code.transactionEncode(transactionData)
         sign = signature_c.sign(en,key)
-        transactionData["sign"] = sign.decode()
+        transactionData["sign"] = sign
         transactionData["publicKey"] = Key_c.publicKey(key)
         #print('txid:',Code.txid(transactionData))
         transactionData["txid"] = Code.txid(transactionData)
@@ -99,25 +99,25 @@ class Transaction:
         
 
         return True
-"""
+
 transaction = {
     "to":"cxfcb42deca97e4e8339e0b950ba5efa368fe71a55",
-    "out":{"cic":"10","now":"100"},
+    "out":{"cic":"10"},
     "nonce":"1",
     "fee":"1"
 }
-x = Transaction.newTransaction(Transaction.newTransaction(transaction,"24ac4b12bbb37e5b1e59830c7e376f1963b9cacb4233fa53"),"24ac4b12bbb37e5b1e59830c7e376f1963b9cacb4233fa53")
+x = Transaction.newTransaction(Transaction.newTransaction(transaction,"97ddae0f3a25b92268175400149d65d6887b9cefaf28ea2c078e05cdc15a3c0a"),"97ddae0f3a25b92268175400149d65d6887b9cefaf28ea2c078e05cdc15a3c0a")
 
 print(x)
 
+print(Code.transactionEncode(x))
+b = Code.transactionEncode(x)
+print(Code.transactionDecode(b))
 
-print(Code.transactionDecode("000000000000000000000000000001cxfcb42deca97e4e8339e0b950ba5efa368fe71a55000000000000000000000000000001now000000000000000000000000000100cic000000000000000000000000000010"))
-
-
+'''
 =======
 #print(x)
 #y = Code.txid(x)
 #print(y)
 #print(Code.transactionDecode("000000000000000000000000000001cxfcb42deca97e4e8339e0b950ba5efa368fe71a55000000000000000000000000000001now000000000000000000000000000100cic000000000000000000000000000010"))
-"""
-
+'''
