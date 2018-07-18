@@ -110,7 +110,7 @@ class Transaction:
 
 transaction = {
     "to":"cxfcb42deca97e4e8339e0b950ba5efa368fe71a55",
-    "out":{"cic":"10"},
+    "out":{"ttt":"10"},
     "nonce":"1",
     "fee":"1"
 }

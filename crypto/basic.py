@@ -42,14 +42,18 @@ class Key_c:
         pub_hex=(pub.to_string()).hex()
         return pub_hex
         '''
-        privKey = eth_keys.keys.PrivateKey(binascii.unhexlify(priv))
-        pubKey = privKey.public_key
-        return pubKey
+        #privKey = eth_keys.keys.PrivateKey(binascii.unhexlify(priv))
+        #pubKey = privKey.public_key
+
+        signkey = SigningKey.from_string(bytes().fromhex(priv), curve=SECP256k1)
+        verkey = signkey.get_verifying_key()
+        pubkey = binascii.hexlify(verkey.to_string())
+        return pubkey.decode()
     def address(pub):
         r = "cx"+Hash_c.sha256_string(pub)[24:64]
         #r = pub.to_checksum_address()
         return r
-    def bitcoinpub2addr(key): #input string, output string 
+    def bitcoinpub2addr(key):
         pubkey = b"04" + b(key) 
         ripemd = hashlib.new('ripemd160') 
         ripemd.update(hashlib.sha256(binascii.unhexlify(pubkey)).digest()) 
@@ -59,7 +63,6 @@ class Key_c:
         checksum = hashlib.sha256(hashlib.sha256(hash_key).digest()).digest()[:4] 
         key = key + binascii.hexlify(checksum) 
         return str(base58.b58encode(binascii.unhexlify(key)),'ascii')
-
     def exp():
         f = Key_c.privateKey()
         f2 = Key_c.publicKey(f)
@@ -81,12 +84,14 @@ class signature_c:
         x = signature.sign("blahblah","24ac4b12bbb37e5b1e59830c7e376f1963b9cacb4233fa53")
         h = signature.verify(x,b("blahblah"),key.publicKey("24ac4b12bbb37e5b1e59830c7e376f1963b9cacb4233fa53"))
         return h
-#h = Key_c.privateKey()
-#print(h)
-#t = Key_c.bitcoinpub2addr(Key_c.publicKey(h))
-#print(t)
-#print(Key_c.publicKey("97ddae0f3a25b92268175400149d65d6887b9cefaf28ea2c078e05cdc15a3c0a"))
-#print(Key_c.address("7b83ad6afb1209f3c82ebeb08c0c5fa9bf6724548506f2fb4f991e2287a77090177316ca82b0bdf70cd9dee145c3002c0da1d92626449875972a27807b73b42e"))
+h = Key_c.privateKey()
+print(h)
+print(Key_c.publicKey(h))
+t = Key_c.bitcoinpub2addr(Key_c.publicKey(h))
+
+print(t)
+print(Key_c.publicKey("97ddae0f3a25b92268175400149d65d6887b9cefaf28ea2c078e05cdc15a3c0a"))
+print(Key_c.address("7b83ad6afb1209f3c82ebeb08c0c5fa9bf6724548506f2fb4f991e2287a77090177316ca82b0bdf70cd9dee145c3002c0da1d92626449875972a27807b73b42e"))
 
 #r = signature_c.sign("123","97ddae0f3a25b92268175400149d65d6887b9cefaf28ea2c078e05cdc15a3c0a")
 #b = signature_c.verify(r,b"123",Key_c.publicKey("97ddae0f3a25b92268175400149d65d6887b9cefaf28ea2c078e05cdc15a3c0a"))
