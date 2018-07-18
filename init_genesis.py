@@ -25,7 +25,9 @@ db.balanceDB.put('cxtest'.encode(), pickle.dumps(feeAccount))
 db.createBlock(genesisBlock)
 print('block 0:',db.getBlockByID(0))
 #key = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(38))
+
 key = '97ddae0f3a25b92268175400149d65d6887b9cefaf28ea2c078e05cdc15a3c0a'
+
 #print(key)
 t = time.time()
 for i in range(10):
@@ -35,14 +37,14 @@ for i in range(10):
 	transaction['to'] = 'cx' + ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(38))
 	transaction['out'] = {'cic':str(random.randint(10,20)),'now':str(random.randint(5,10))}
 	transaction['nonce'] = str(i+1)
-	
 	transaction = Transaction.newTransaction(transaction, key)
+	print(transaction)
+	
 	#print(transaction['txid'])
-	#transaction['publicKey'] = hex(transaction['publicKey'])
-	#print(type(transaction['publicKey']))
+	transactions.append(transaction)
 	data = {'method':'sendTransaction', 'param':[transaction]}
 	headers = {'Content-Type':'application/json'}
-	r = requests.post('http://192.168.0.178:9000', headers = headers, data = json.dumps(data))
+	r = requests.post('http://192.168.51.201:9000', headers = headers, data = json.dumps(data))
 	#print(r.text)
 print((time.time()-t))
 """

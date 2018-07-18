@@ -89,6 +89,7 @@ class Database:
 				if accountData['balance'][coin] < int(transaction['out'][coin]):
 					print('coinerror')
 					return False
+
 			if 'cic' in transaction['out']:
 				cic = int(transaction['out']['cic'])
 			else:
@@ -107,9 +108,11 @@ class Database:
 
 	def updateBalanceAndNonce(self, transaction):
 		#Update the balance after if the transaction has been verified
+
 		feeAddress = 'cxtest'
 		fee = transaction['fee']
 		feeAccount = pickle.loads(self.balanceDB.get(feeAddress.encode()))
+
 		receiver = transaction["to"]
 		try:
 			receiverAccount = pickle.loads(self.balanceDB.get(receiver.encode()))
@@ -122,8 +125,10 @@ class Database:
 			senderAccount = pickle.loads(self.balanceDB.get(sender.encode()))
 		except:
 			return False
+
 		senderAccount['balance']['cic'] -= int(fee)
 		feeAccount['balance']['cic'] += int(fee)
+
 		for coin in transaction['out']:
 			senderAccount['balance'][coin] -= int(transaction['out'][coin])
 			receiverAccount['balance'][coin] += int(transaction['out'][coin])
@@ -134,7 +139,6 @@ class Database:
 		try:
 			self.balanceDB.put(sender.encode(), pickle.dumps(senderAccount))
 			self.balanceDB.put(receiver.encode(), pickle.dumps(receiverAccount))
-			self.balanceDB.put(feeAddress.encode(), pickle.dumps(feeAccount))
 			return True
 		except:
 			return False
