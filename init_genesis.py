@@ -18,13 +18,14 @@ db.blockDB.deleteAll()
 db.transactionDB.deleteAll()
 db.rootDB.deleteAll()
 db.balanceDB.deleteAll()
-genesisAccount = {"address":'cx6e3d4550ef058740705ebc7fcf392379c72f11fc', "balance":{"cic":300,"now":100}, "nonce":0}
-db.balanceDB.put('cx6e3d4550ef058740705ebc7fcf392379c72f11fc'.encode(), pickle.dumps(genesisAccount))
+genesisAccount = {"address":'cxa65cfc9af6b7daae5811836e1b49c8d2570c9387', "balance":{"cic":1000,"now":100}, "nonce":0}
+db.balanceDB.put('cxa65cfc9af6b7daae5811836e1b49c8d2570c9387'.encode(), pickle.dumps(genesisAccount))
+feeAccount = {"address": "cxtest", "balance":{"cic":1000}, "nonce":0}
+db.balanceDB.put('cxtest'.encode(), pickle.dumps(feeAccount))
 db.createBlock(genesisBlock)
 print('block 0:',db.getBlockByID(0))
 #key = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(38))
 key = '97ddae0f3a25b92268175400149d65d6887b9cefaf28ea2c078e05cdc15a3c0a'
-print(Key_c.address(key))
 #print(key)
 t = time.time()
 for i in range(10):

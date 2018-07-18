@@ -61,7 +61,7 @@ class signature_c:
         return binascii.hexlify(sig)
     def verify(signData,rawData,pub):
         signData = binascii.unhexlify(signData)
-        pub = VerifyingKey.from_string(bytes().fromhex(pub))
+        pub = VerifyingKey.from_string(bytes().fromhex(pub),curve=SECP256k1)
         return pub.verify(signData, rawData)
     def exp():
         x = signature.sign("blahblah","24ac4b12bbb37e5b1e59830c7e376f1963b9cacb4233fa53")

@@ -76,24 +76,28 @@ class Database:
 		#Verify whether the balance of the account is enough and the nonce is correct
 		#Return true if everything is correct, else false
 		address = Key_c.address(transaction["publicKey"])
-		#print('address:',address)
+		print('address:',address)
 		#address = 'ilwOop'
 		try:
 			accountData = pickle.loads(self.balanceDB.get(address.encode()))
-			#print('account:', accountData)
+			print('account:', accountData)
 		except:
+			print('accounterror')
 			return False
 		try:
 			for coin in transaction['out']:
 				if accountData['balance'][coin] < int(transaction['out'][coin]):
+					print('coinerror')
 					return False
 			if 'cic' in transaction['out']:
 				cic = int(transaction['out']['cic'])
 			else:
 				cic = 0
 			if accountData['balance']['cic'] < cic + int(transaction['fee']):
+				print('feeerror')
 				return False
 		except:
+			print('idk')
 			return False
 		print(accountData['nonce'], int(transaction['nonce']))
 		if accountData['nonce']+1 != int(transaction['nonce']):
@@ -103,7 +107,7 @@ class Database:
 
 	def updateBalanceAndNonce(self, transaction):
 		#Update the balance after if the transaction has been verified
-		feeAddress = ''
+		feeAddress = 'cxtest'
 		fee = transaction['fee']
 		feeAccount = pickle.loads(self.balanceDB.get(feeAddress.encode()))
 		receiver = transaction["to"]
@@ -118,8 +122,8 @@ class Database:
 			senderAccount = pickle.loads(self.balanceDB.get(sender.encode()))
 		except:
 			return False
-		senderAccount['balance']['cic'] -= fee
-		feeAccount['balance']['cic'] += fee
+		senderAccount['balance']['cic'] -= int(fee)
+		feeAccount['balance']['cic'] += int(fee)
 		for coin in transaction['out']:
 			senderAccount['balance'][coin] -= int(transaction['out'][coin])
 			receiverAccount['balance'][coin] += int(transaction['out'][coin])

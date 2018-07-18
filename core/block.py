@@ -56,7 +56,7 @@ class Block:
         }
         return blockData
     def pushTransactionToArray(blockData, transaction):
-        blockData['transaction']['hash'].append(transaction)
+        blockData['transaction'].append(transaction)
         return blockData
         
     def newBlock_POA(blockData,parentblock,key):

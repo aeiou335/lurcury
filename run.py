@@ -52,7 +52,7 @@ def main():
 				newBlock = Block.pushTransactionToArray(newBlock, pendingTran)
 			#print("newBlock:", newBlock)
 			parentBlock = fntdb.getBlockByID(currentBlockNum-1)
-			key = '8c1eba13a46fd0e18ee22e5e3da7cf139977090040622a83'
+			key = '97ddae0f3a25b92268175400149d65d6887b9cefaf28ea2c078e05cdc15a3c0a'
 			#print('parent', parentBlock)
 			newBlock = Block.newBlock_POA(newBlock, parentBlock, key)
 			try:

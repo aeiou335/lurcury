@@ -68,7 +68,7 @@ class Handler(BaseHTTPRequestHandler):
 				value = pickle.loads(idx_db.Get(str(param).encode()))
 			except:
 				value = "No such id."
-			#print("value:", value)
+			print("value:", value)
 
 		elif method == "getTransaction":
 			try:
