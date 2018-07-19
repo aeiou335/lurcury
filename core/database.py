@@ -78,6 +78,8 @@ class Database:
 		try:
 			if transaction.type == "btc":
 				address = Key_c.bitcoinaddress(transaction["publicKey"])
+			else if transaction.type == "eth":
+				address = Key_c.ethereumaddress(transaction["publicKey"])
 			else
 				address = Key_c.address(transaction["publicKey"])
 		except:
