@@ -4,6 +4,7 @@ import eth_keys, eth_utils, binascii, os
 import hashlib
 import binascii
 from six import b, print_, binary_type
+import sha3
 #from .keys import SigningKey, VerifyingKey
 import base58
 import sys
@@ -53,6 +54,10 @@ class Key_c:
         r = "cx"+Hash_c.sha256_string(pub)[24:64]
         #r = pub.to_checksum_address()
         return r
+    def ethereumaddress(key):
+        k = sha3.keccak_256()
+        k.update(bytes().fromhex(key))
+        return "0x"+k.hexdigest()[24:64]
     def bitcoinaddress(key):
         pubkey = b"04" + b(key) 
         ripemd = hashlib.new('ripemd160') 
@@ -90,9 +95,9 @@ print(Key_c.publicKey(h))
 t = Key_c.bitcoinaddress(Key_c.publicKey(h))
 
 print(t)
-print(Key_c.publicKey("97ddae0f3a25b92268175400149d65d6887b9cefaf28ea2c078e05cdc15a3c0a"))
-print(Key_c.address("7b83ad6afb1209f3c82ebeb08c0c5fa9bf6724548506f2fb4f991e2287a77090177316ca82b0bdf70cd9dee145c3002c0da1d92626449875972a27807b73b42e"))
-
+#print(Key_c.publicKey("97ddae0f3a25b92268175400149d65d6887b9cefaf28ea2c078e05cdc15a3c0a"))
+#print(Key_c.address("7b83ad6afb1209f3c82ebeb08c0c5fa9bf6724548506f2fb4f991e2287a77090177316ca82b0bdf70cd9dee145c3002c0da1d92626449875972a27807b73b42e"))
+print("ethadd:",Key_c.ethereumaddress(Key_c.publicKey(h)))
 #r = signature_c.sign("123","97ddae0f3a25b92268175400149d65d6887b9cefaf28ea2c078e05cdc15a3c0a")
 #b = signature_c.verify(r,b"123",Key_c.publicKey("97ddae0f3a25b92268175400149d65d6887b9cefaf28ea2c078e05cdc15a3c0a"))
 #print(r)
