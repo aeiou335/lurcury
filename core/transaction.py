@@ -45,7 +45,10 @@ class Code:
         re = re+reToken
         re = re+str(len(trans["to"]))+trans["to"]
         re = re+trans["type"]
-        re = re+trans["input"]
+        try:
+            re = re+trans["input"]
+        except:
+            re = re
         #print(re)
         return re
     #newTransaction
@@ -132,8 +135,8 @@ transaction = {
     "out":{"ttt":"10"},
     "nonce":"1",
     "fee":"1",
-    "type":"btc",
-    "input":"90f4ccd100000000000000000000000000000"
+    "type":"btc"
+    #"input":"90f4ccd100000000000000000000000000000"
 }
 x = Transaction.newTransaction(Transaction.newTransaction(transaction,"97ddae0f3a25b92268175400149d65d6887b9cefaf28ea2c078e05cdc15a3c0a"),"97ddae0f3a25b92268175400149d65d6887b9cefaf28ea2c078e05cdc15a3c0a")
 print(x)
