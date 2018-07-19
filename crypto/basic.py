@@ -89,6 +89,7 @@ class signature_c:
         x = signature.sign("blahblah","24ac4b12bbb37e5b1e59830c7e376f1963b9cacb4233fa53")
         h = signature.verify(x,b("blahblah"),key.publicKey("24ac4b12bbb37e5b1e59830c7e376f1963b9cacb4233fa53"))
         return h
+'''
 h = Key_c.privateKey()
 print(h)
 print(Key_c.publicKey(h))
@@ -107,5 +108,5 @@ print(b)
 
 #x = signature_c.sign("blahblah","f8b9fc996979291ac2968faeaedd88cd4c2fbc5611fda0605415e05eafc6658a")
 #print(x)
-
+'''
 

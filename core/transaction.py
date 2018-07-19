@@ -45,6 +45,7 @@ class Code:
         re = re+reToken
         re = re+str(len(trans["to"]))+trans["to"]
         re = re+trans["type"]
+        re = re+trans["input"]
         #print(re)
         return re
     #newTransaction
@@ -92,7 +93,8 @@ class Code:
         print(toint)
         re["to"] = transaction[95:95+toint]
         #print(transaction[95+toint:])
-        re["type"] = transaction[95+toint:]
+        re["type"] = transaction[95+toint:95+toint+3]
+        re["input"] = transaction[95+toint+3:95+toint+3+33]
         #re["out"] = outjson
         #print("ch",re)
         #print("ch",transaction)
@@ -107,7 +109,7 @@ class Transaction:
         #print('txid:',Code.txid(transactionData))
         transactionData["txid"] = Code.txid(transactionData)
         #print("top2",Code.txid(transactionData))
-
+        
         return transactionData
     def verifyTransaction(transaction):
         #print(transaction)
@@ -130,7 +132,8 @@ transaction = {
     "out":{"ttt":"10"},
     "nonce":"1",
     "fee":"1",
-    "type":"btc"
+    "type":"btc",
+    "input":"90f4ccd100000000000000000000000000000"
 }
 x = Transaction.newTransaction(Transaction.newTransaction(transaction,"97ddae0f3a25b92268175400149d65d6887b9cefaf28ea2c078e05cdc15a3c0a"),"97ddae0f3a25b92268175400149d65d6887b9cefaf28ea2c078e05cdc15a3c0a")
 print(x)
