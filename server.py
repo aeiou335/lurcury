@@ -7,7 +7,7 @@ import leveldb
 import sys
 sys.path.append('trie')
 import MerklePatriciaTrie as MPT
-import db
+import db as db
 sys.path.append('core')
 from database import Database
 from transaction import Transaction
@@ -100,7 +100,7 @@ class Handler(BaseHTTPRequestHandler):
 		self.wfile.write(json.dumps(post_return).encode())
 
 	def do_POST(self):
-		db = leveldb.LevelDB("trie/rootdb")
+		#db = leveldb.LevelDB("trie/rootdb")
 		#ctype, pdict = cgi.parse_header(self.headers['Content-Type'])
 		#if ctype == 'application/json':
 		length = int(self.headers['content-length'])
@@ -145,13 +145,42 @@ class Handler(BaseHTTPRequestHandler):
 					value = False
 			else:
 				value = False
+		#param: []
+		elif method == "addNewCoin":
+			requiredFeeRate = 0.1
+			requiredFee = 10
+			currRate = 100
+			balanceDB = db.DB('trie/balanceDB')
+			assert len(param) == 3
+			cic = param[0]
+			name = param[1]
+			address = param[2]
+			#balanceDB.put('name'.encode(), pickle.dumps(['cic', 'now']))
+			feeAccount = pickle.loads(balanceDB.get('cxtest'.encode()))
+			userAccount = pickle.loads(balanceDB.get(address.encode()))
+			currName = pickle.loads(balanceDB.get('name'.encode()))
+			if cic < requiredFee:
+				self.send_error(400, "Fee is not enough!")
+			if userAccount['balance']['cic'] < cic:
+				self.send_error(400, "Account doesn't have enough cic!")
+			if name in currName:
+				self.send_error(400, "Name has been used!")
+			money = currRate * (cic * (1 - requiredFeeRate))
+			userAccount['balance'][name] += money
+			userAccount['balance']['cic'] -= cic
+			feeAccount['balance']['cic'] += cic*requiredFeeRate
+			currName.append(name)
+			balanceDB.put('cxtest'.encode(), pickle.dumps(feeAccount))
+			balanceDB.put(address.encode(), pickle.dumps(userAccount))
+			balanceDB.put('name'.encode(), pickle.dumps(currName))
+			value = userAccount
+
 		else:
 			self.send_error(415, "No such method.")				
 
 		self.send_response(200)
 		self.send_header('Content-type', 'application/json')
 		self.send_header('Access-Control-Allow-Credentials', 'true')
-		self.send_header('Access-Control-Allow-Origin', 'http://192.168.0.125:8888')
 			
 		self.end_headers()
 		#print("post_values:", post_values)
@@ -162,6 +191,6 @@ class Handler(BaseHTTPRequestHandler):
 		self.wfile.write(json.dumps(post_return).encode())
 if __name__ == '__main__':
 	from http.server import HTTPServer
-	server = HTTPServer(("192.168.0.125", 9000), Handler)
+	server = HTTPServer(("192.168.0.178", 9000), Handler)
 	print("Starting server, use <Ctrl-C> to stop")
 	server.serve_forever()  
