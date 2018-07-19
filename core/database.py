@@ -75,9 +75,12 @@ class Database:
 	def verifyBalanceAndNonce(self, transaction):
 		#Verify whether the balance of the account is enough and the nonce is correct
 		#Return true if everything is correct, else false
-		if transaction.type == "btc":
-			address = Key_c.bitcoinaddress(transaction["publicKey"])
-		else
+		try:
+			if transaction.type == "btc":
+				address = Key_c.bitcoinaddress(transaction["publicKey"])
+			else
+				address = Key_c.address(transaction["publicKey"])
+		except:
 			address = Key_c.address(transaction["publicKey"])
 		print('address:',address)
 		#address = 'ilwOop'
