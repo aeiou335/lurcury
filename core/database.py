@@ -63,28 +63,19 @@ class Database:
 		self.transactionDB.put(key, pickle.dumps(pendingTransaction))
 		return newTransaction
 
-	def testBalance(self):
-		for i in range(5):
-			fakeAccount = {}
-			fakeAccount['balance'] = {'cic':random.randint(1,100),'now':random.randint(1,100)}
-			fakeAccount['nonce'] = str(random.randint(1,100))
-			fakeAccount['address'] = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(6))
-			#print(fakeAccount)
-			self.balanceDB.put(fakeAccount['address'].encode(), pickle.dumps(fakeAccount))
-
 	def verifyBalanceAndNonce(self, transaction):
 		#Verify whether the balance of the account is enough and the nonce is correct
 		#Return true if everything is correct, else false
 		try:
 			if transaction.type == "btc":
 				address = Key_c.bitcoinaddress(transaction["publicKey"])
-			else if transaction.type == "eth":
+			elif transaction.type == "eth":
 				address = Key_c.ethereumaddress(transaction["publicKey"])
-			else
+			else:
 				address = Key_c.address(transaction["publicKey"])
 		except:
 			address = Key_c.address(transaction["publicKey"])
-		print('address:',address)
+		#print('address:',address)
 		#address = 'ilwOop'
 		try:
 			accountData = pickle.loads(self.balanceDB.get(address.encode()))
@@ -105,6 +96,7 @@ class Database:
 			if accountData['balance']['cic'] < cic + int(transaction['fee']):
 				print('feeerror')
 				return False
+				
 		except:
 			print('idk')
 			return False
@@ -117,7 +109,7 @@ class Database:
 	def updateBalanceAndNonce(self, transaction):
 		#Update the balance after if the transaction has been verified
 
-		feeAddress = 'cxtest'
+		feeAddress = 'cx68c59720de07e4fdc28efab95fa04d2d1c5a2fc1'
 		fee = transaction['fee']
 		feeAccount = pickle.loads(self.balanceDB.get(feeAddress.encode()))
 
@@ -141,12 +133,32 @@ class Database:
 			senderAccount['balance'][coin] -= int(transaction['out'][coin])
 			receiverAccount['balance'][coin] += int(transaction['out'][coin])
 		senderAccount['nonce'] += 1
-		#for key, value in self.balanceDB:
-		#	print(key, value)
-		print('sender:', senderAccount)	
+		
+		currName = pickle.loads(self.balanceDB.get('name'.encode()))
+		if 'input' in transaction:
+			print('input:',transaction['input'])
+			if len(transaction['input']) > 7:
+				msg = transaction['input']
+				print('msg:', msg)
+				if msg[:4] == '90f4':
+					name = msg[4:7]
+					amount = int(msg[7:])
+					requiredFee = 10
+					if int(transaction['out']['cic']) < requiredFee:
+						return False
+					if transaction['to'] != feeAddress:
+						return False
+					if name in currName:
+						return False
+				currName.append(name)
+				senderAccount['balance'][name] += amount
+
+		print("senderAccount:", senderAccount)
+		print("currName:", currName)		
 		try:
 			self.balanceDB.put(sender.encode(), pickle.dumps(senderAccount))
 			self.balanceDB.put(receiver.encode(), pickle.dumps(receiverAccount))
+			self.balanceDB.put('name'.encode(), pickle.dumps(currName))
 			return True
 		except:
 			return False

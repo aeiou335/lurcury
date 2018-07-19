@@ -83,10 +83,15 @@ class Handler(BaseHTTPRequestHandler):
 
 		elif method == "getAccount":
 			balanceDB = leveldb.LevelDB("trie/balanceDB")
-			value = pickle.loads(balanceDB.Get(param.encode()))
+			try:
+				value = pickle.loads(balanceDB.Get(param.encode()))
+			except:
+				self.send_error(400, "Account doesn't exist!")
+				return 0
 
 		else:
-			self.send_error(415, "No such method.")	
+			self.send_error(415, "No such method.")
+			return 0	
 
 		self.send_response(200)
 		self.send_header('Content-type', 'application/json')
@@ -146,37 +151,10 @@ class Handler(BaseHTTPRequestHandler):
 			else:
 				value = False
 		#param: []
-		elif method == "addNewCoin":
-			requiredFeeRate = 0.1
-			requiredFee = 10
-			currRate = 100
-			balanceDB = db.DB('trie/balanceDB')
-			assert len(param) == 3
-			cic = param[0]
-			name = param[1]
-			address = param[2]
-			#balanceDB.put('name'.encode(), pickle.dumps(['cic', 'now']))
-			feeAccount = pickle.loads(balanceDB.get('cxtest'.encode()))
-			userAccount = pickle.loads(balanceDB.get(address.encode()))
-			currName = pickle.loads(balanceDB.get('name'.encode()))
-			if cic < requiredFee:
-				self.send_error(400, "Fee is not enough!")
-			if userAccount['balance']['cic'] < cic:
-				self.send_error(400, "Account doesn't have enough cic!")
-			if name in currName:
-				self.send_error(400, "Name has been used!")
-			money = currRate * (cic * (1 - requiredFeeRate))
-			userAccount['balance'][name] += money
-			userAccount['balance']['cic'] -= cic
-			feeAccount['balance']['cic'] += cic*requiredFeeRate
-			currName.append(name)
-			balanceDB.put('cxtest'.encode(), pickle.dumps(feeAccount))
-			balanceDB.put(address.encode(), pickle.dumps(userAccount))
-			balanceDB.put('name'.encode(), pickle.dumps(currName))
-			value = userAccount
 
 		else:
-			self.send_error(415, "No such method.")				
+			self.send_error(415, "No such method.")
+			return 0				
 
 		self.send_response(200)
 		self.send_header('Content-type', 'application/json')
@@ -184,7 +162,7 @@ class Handler(BaseHTTPRequestHandler):
 			
 		self.end_headers()
 		#print("post_values:", post_values)
-		print(value)
+		print('test')
 		post_return = {}
 		post_return['method'] = method
 		post_return['result'] = value

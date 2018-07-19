@@ -31,6 +31,7 @@ def main():
 		for j in range(2):
 			time.sleep(2)
 			newBlock = Block.block()
+			transactions = []
 			for i in range(5):
 				pendingTran = fntdb.getPendingTransaction()
 				print(pendingTran)
@@ -47,9 +48,10 @@ def main():
 					
 					if not fntdb.updateBalanceAndNonce(pendingTran):
 						print("update error")
-						return False
+						continue
 					
 				newBlock = Block.pushTransactionToArray(newBlock, pendingTran)
+				transactions.append(pendingTran)
 			#print("newBlock:", newBlock)
 			parentBlock = fntdb.getBlockByID(currentBlockNum-1)
 			key = '97ddae0f3a25b92268175400149d65d6887b9cefaf28ea2c078e05cdc15a3c0a'
@@ -62,7 +64,7 @@ def main():
 				continue
 			#fntdb.updateDBAccountStatus(newBlock)
 			
-			transactions = newBlock['transaction']
+			#transactions = newBlock['transaction']
 			if len(transactions) == 0:
 				continue
 			for transaction in transactions:

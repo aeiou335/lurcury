@@ -117,15 +117,13 @@ class Transaction:
     def verifyTransaction(transaction):
         #print(transaction)
         en = Code.transactionEncode(transaction)
-        print('pub:', transaction['publicKey'])
-        print(':', transaction['sign'])
-        print('en:', en)
-        print('tran:', transaction)
-        signature_c.verify(transaction["sign"],en.encode(),transaction["publicKey"])
-        #except:
-        #    print("sign error")
-        #    return False
-        
+        try:
+            signature_c.verify(transaction["sign"],en.encode(),transaction["publicKey"])
+        except:
+            print("sign error")
+            return False
+
+
 
         return True
 
