@@ -4,3 +4,6 @@ trie/rootDB
 trie/transactionDB
 trie/testdb
 trie/btcRelayDB
+
+__pycache__/
+*.pyc
