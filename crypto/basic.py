@@ -53,7 +53,7 @@ class Key_c:
         r = "cx"+Hash_c.sha256_string(pub)[24:64]
         #r = pub.to_checksum_address()
         return r
-    def bitcoinpub2addr(key):
+    def bitcoinaddress(key):
         pubkey = b"04" + b(key) 
         ripemd = hashlib.new('ripemd160') 
         ripemd.update(hashlib.sha256(binascii.unhexlify(pubkey)).digest()) 
@@ -87,7 +87,7 @@ class signature_c:
 h = Key_c.privateKey()
 print(h)
 print(Key_c.publicKey(h))
-t = Key_c.bitcoinpub2addr(Key_c.publicKey(h))
+t = Key_c.bitcoinaddress(Key_c.publicKey(h))
 
 print(t)
 print(Key_c.publicKey("97ddae0f3a25b92268175400149d65d6887b9cefaf28ea2c078e05cdc15a3c0a"))
