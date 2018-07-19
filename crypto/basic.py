@@ -7,6 +7,7 @@ from six import b, print_, binary_type
 import sha3
 #from .keys import SigningKey, VerifyingKey
 import base58
+from identity import identity
 import sys
 sys.path.append("../")
 from ecdsa import SigningKey, VerifyingKey, NIST256p, SECP256k1
@@ -32,6 +33,11 @@ class Hash_c:
     '''
 
 class Key_c:
+    def bitcoinkey(wifkey):
+        unit = identity()
+        unit.init_priv(wif=wifkey)
+        pb = unit.get_pubkey()
+        return unit.get_privkey()
     def privateKey():
         priv = SigningKey.generate(curve=SECP256k1)
         priv_hex=(priv.to_string()).hex()
@@ -89,6 +95,7 @@ class signature_c:
         x = signature.sign("blahblah","24ac4b12bbb37e5b1e59830c7e376f1963b9cacb4233fa53")
         h = signature.verify(x,b("blahblah"),key.publicKey("24ac4b12bbb37e5b1e59830c7e376f1963b9cacb4233fa53"))
         return h
+#print(Key_c.bitcoinkey("5KUEwxHXTyWPoE6SLeomvqUQmN6o63Hzu7YFC9K6A4NKXh75QCr"))
 '''
 h = Key_c.privateKey()
 print(h)
