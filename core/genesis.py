@@ -19,7 +19,7 @@ class Genesis:
             "extraData":"",
             "ParentHash":"",
             "transaction":[{"to":"cxfcb42deca97e4e8339e0b950ba5efa368fe71a55",
-                            "out":{"cic":"5000000000000000000000000000","now":"100"},
+                            "out":{"cic":"5000000000000000000000000000","now":"100000000"},
                             "nonce":"1",
                             "fee":"1"}]
         }

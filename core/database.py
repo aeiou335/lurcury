@@ -213,4 +213,4 @@ class Database:
 			return ""
 		return pickle.loads(block)
 
-#print(config.config()["fee"])
+

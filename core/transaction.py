@@ -123,12 +123,10 @@ class Transaction:
         except:
             print("sign error")
             return False
-
-
         return True
+
 class Input:
     def tokenPublish(transactionData):
-        #transactionData[""]
         if len(transaction['input']) > 7:
             msg = transaction['input']
             #print('msg:', msg)
