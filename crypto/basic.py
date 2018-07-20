@@ -7,8 +7,9 @@ from six import b, print_, binary_type
 import sha3
 #from .keys import SigningKey, VerifyingKey
 import base58
-from identity import identity
 import sys
+sys.path.append("crypto")
+from identity import identity
 sys.path.append("../")
 from ecdsa import SigningKey, VerifyingKey, NIST256p, SECP256k1
 class Hash_c:

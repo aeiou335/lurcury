@@ -32,10 +32,6 @@ class TransactionTrie(object):
 		return root_hash, value
 
 class Handler(BaseHTTPRequestHandler):
-
-	#def __init__(self):
-		#self.blockDB = leveldb.LevelDB("testdb")
-		#self.tranDB = leveldb.LevelDB("test2db")
 	def do_OPTIONS(self):
 		self.send_response(200, "ok")
 		self.send_header('Access-Control-Allow-Credentials', 'true')
@@ -105,21 +101,12 @@ class Handler(BaseHTTPRequestHandler):
 		self.wfile.write(json.dumps(post_return).encode())
 
 	def do_POST(self):
-		#db = leveldb.LevelDB("trie/rootdb")
-		#ctype, pdict = cgi.parse_header(self.headers['Content-Type'])
-		#if ctype == 'application/json':
-		length = int(self.headers['content-length'])
-		#print(self.rfile.read(length).decode())            
+		length = int(self.headers['content-length'])            
 		post_values = json.loads(self.rfile.read(length).decode())
 		print(post_values)
 		method = post_values.get('method')
-		#assert isinstance(method, str), "Method must be a string!"
 
 		param = post_values.get('param')
-		#print(method, param)
-		#assert isinstance(param, str)
-		#idx = post_values.get('id')
-		#assert isinstance(idx, int), "ID must be an integer!"
 		
 		if method == "signTransaction":
 			transaction = param[0]

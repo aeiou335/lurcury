@@ -2,7 +2,8 @@ import sys
 
 #sys.path.append("../crypto")
 from crypto.basic import *#Hash_c
-
+#sys.path.append('core')
+from config import config
 
 class Code:
     def transactionEncode(transaction):
@@ -43,7 +44,7 @@ class Code:
             trans["fee"]="0"+trans["fee"]
         re = re+trans["fee"]
         re = re+reToken
-        re = re+str(len(trans["to"]))+trans["to"]
+        re = re+str(len(trans["to"]))+trans["to"].lower()
         re = re+trans["type"]
         try:
             re = re+trans["input"]
@@ -124,29 +125,45 @@ class Transaction:
             return False
 
 
-
         return True
+class Input:
+    def tokenPublish(transactionData):
+        #transactionData[""]
+        if len(transaction['input']) > 7:
+            msg = transaction['input']
+            #print('msg:', msg)
+            if msg[:4] == '90f4':
+                name = msg[4:7]
+                amount = int(msg[7:])
+                requiredFee = int(config.config()["fee"])
+                if int(transaction['out'][config.config()["feeToken"]]) < int(config.config()["tokenPublishfee"]):
+                    return False
+                if transaction['to'] != config.config()["receiveAddress"]:
+                    return False
+                return True
 
 transaction = {
     #"to":"cxfcb42deca97e4e8339e0b950ba5efa368fe71a55",
-    "to":"16YvcZqzg526o7Q52R9Td4SRYGGmjTPUD7",
-    "out":{"ttt":"10"},
+    "to":"16yvczqzg526o7q52r9td4sryggmjtpud7",
+    "out":{"cic":"10000"},
     "nonce":"1",
-    "fee":"1",
-    "type":"btc"
-    #"input":"90f4ccd100000000000000000000000000000"
+    "fee":"10",
+    "type":"btc",
+    "input":"90f4ccd100000000000000000000000000000"
 }
-x = Transaction.newTransaction(Transaction.newTransaction(transaction,"97ddae0f3a25b92268175400149d65d6887b9cefaf28ea2c078e05cdc15a3c0a"),"97ddae0f3a25b92268175400149d65d6887b9cefaf28ea2c078e05cdc15a3c0a")
-print(x)
-print(x)
+print(Input.tokenPublish(transaction))
 
-print(Code.transactionEncode(x))
-b = Code.transactionEncode(x)
-print(Code.transactionDecode(b))
-pub = '7b83ad6afb1209f3c82ebeb08c0c5fa9bf6724548506f2fb4f991e2287a77090177316ca82b0bdf70cd9dee145c3002c0da1d92626449875972a27807b73b42e'
-en = '000000000000000000000000000001000000000000000000000000000010cic00000000000000000000000000001040cxnIQqsD2gBHcch94c7pQaVLXvHg7USoQmPywn27cic'
-sign = 'ef24fcfd466eb8aeaebc9843f1cbd81cd305047306ce71eb1d7062d28565b43266f6286f6789e1c27670cbe2fd0ece3106ff94bc051a03b2f57aa503e08dcab2'
-signature_c.verify(sign,en.encode(),pub)
+#x = Transaction.newTransaction(Transaction.newTransaction(transaction,"97ddae0f3a25b92268175400149d65d6887b9cefaf28ea2c078e05cdc15a3c0a"),"97ddae0f3a25b92268175400149d65d6887b9cefaf28ea2c078e05cdc15a3c0a")
+#print(x)
+#print(x)
+
+#print(Code.transactionEncode(x))
+#b = Code.transactionEncode(x)
+#print(Code.transactionDecode(b))
+#pub = '7b83ad6afb1209f3c82ebeb08c0c5fa9bf6724548506f2fb4f991e2287a77090177316ca82b0bdf70cd9dee145c3002c0da1d92626449875972a27807b73b42e'
+#en = '000000000000000000000000000001000000000000000000000000000010cic00000000000000000000000000001040cxnIQqsD2gBHcch94c7pQaVLXvHg7USoQmPywn27cic'
+#sign = 'ef24fcfd466eb8aeaebc9843f1cbd81cd305047306ce71eb1d7062d28565b43266f6286f6789e1c27670cbe2fd0ece3106ff94bc051a03b2f57aa503e08dcab2'
+#signature_c.verify(sign,en.encode(),pub)
 '''
 =======
 #print(x)

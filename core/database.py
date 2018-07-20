@@ -4,6 +4,8 @@ import pickle
 import random
 import string
 from collections import defaultdict
+#sys.path.append('core')
+from config import config
 sys.path.append('trie')
 import db as db
 import MerklePatriciaTrie as MPT
@@ -211,4 +213,4 @@ class Database:
 			return ""
 		return pickle.loads(block)
 
-
+#print(config.config()["fee"])
