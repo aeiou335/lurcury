@@ -8,71 +8,7 @@ sys.path.append('trie')
 import db as db
 import MerklePatriciaTrie as MPT 
 
-class bitcoinInfo: 
-	def blockInfo(num): 
-		r = requests.get("https://blockexplorer.com/api/block-index/"+num) 
-		z = json.loads(r.text[:1000000000]) 
-		#print(z["blockHash"]) 
-		t = requests.get("https://blockexplorer.com/api/block/"+z["blockHash"]) 
-		#print(t.text[:1000000000]) 
-		return t.text[:1000000000]
 
-	def parseTransaction(has): 
-		ourAccount = "168o1kqNquEJeR9vosUB5fw4eAwcVAgh8P"
-		r = requests.get("https://blockexplorer.com/api/tx/"+has) 
-		t = json.loads(r.text[:1000000000])
-		#print(t)
-		transactions = t['vout']
-		flag = False
-		value = 0
-		address = ""
-		for i, transaction in enumerate(transactions):
-			print(transaction)
-			if i < len(transactions)-1:
-				if transaction["scriptPubKey"]["addresses"][0] != ourAccount:
-					continue
-				else:
-					value = transaction['value']
-					flag = True
-			elif i == len(transactions)-1 and flag:
-				address = transaction['scriptPubKey']['asm'][10:]
-		return flag, value, address
-
-	def btcRelay(value, address):
-		balanceDB = db.DB('trie/balanceDB')
-		try:
-			account = pickle.loads(balanceDB.get(address.encode()))
-		except:
-			account = {'address':receiver,'balance':defaultdict(int),'nonce':0}
-		
-		account['balance']['btcRelay'] += value
-
-		try:
-			balanceDB.put(address.encode(), pickle.dumps(account))
-			return True
-		except:
-			return False
-
-	def blockTransaction(): 
-		r = bitcoinInfo.blockInfo("300000") 
-		#print(r) 
-		z = json.loads(r) 
-		print('haha',z["tx"])
-		btcRelayDB = db.DB("trie/btcRelayDB")
-		rootDB = db.Db("trie/rootDB")
-		try:
-			root =  rootDB.get(b"btcRelaytrie")
-		except:
-			root = ""
-		trie = MPT.MerklePatriciaTrie(btcRelayDB, root)
-		for y in z["tx"]: 
-			flag, value, address = bitcoinInfo.parseTransaction(y) 
-			if flag:
-				res = bitcoinInfo.btcRelay(value, address)
-			if res:
-				trie.update(y['txid'], y)
-		new_root = trie.root_hash()
-		rootDB.put(b"btcRelaytrie", new_root)
 #_hash, height, merkleroot, tx, _time, previousblockhash, difficulty, reward
 class thread(threading.Thread):
 	def __init__(self, threadID, name, sql, conn, threadLock):
