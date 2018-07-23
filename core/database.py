@@ -33,7 +33,7 @@ class Database:
 			pending = []
 		#print(len(pending))
 		requireFee = 5
-		if float(newTransaction['fee']) > requireFee: 
+		if int(newTransaction['fee']) > requireFee: 
 			#print('new:',newTransaction)
 			pending.append(newTransaction)
 			#print('pending after append:', pending)
@@ -85,20 +85,20 @@ class Database:
 		#address = 'ilwOop'
 		try:
 			accountData = pickle.loads(self.balanceDB.get(address.encode()))
-			print('account:', accountData)
+			print('account:', int(accountData['balance']['cic']))
 		except:
 			print('accounterror')
 			return False
 		#try:
 		for coin in transaction['out']:
-			if accountData['balance'][coin] < float(transaction['out'][coin]):
+			if accountData['balance'][coin] < int(transaction['out'][coin]):
 				print('coinerror')
 				return False
 		if 'cic' in transaction['out']:
-			cic = float(transaction['out']['cic'])
+			cic = int(transaction['out']['cic'])
 		else:
 			cic = 0
-		if accountData['balance']['cic'] < cic + float(transaction['fee']):
+		if accountData['balance']['cic'] < cic + int(transaction['fee']):
 			print('feeerror')
 			return False
 				
@@ -117,7 +117,7 @@ class Database:
 		feeAddress = con["feeAddress"]
 		fee = transaction['fee']
 		feeAccount = pickle.loads(self.balanceDB.get(feeAddress.encode()))
-		feeAccount['balance']['cic'] += float(fee)
+		feeAccount['balance']['cic'] += int(fee)
 		print("feeAccount:", feeAccount)
 		try:
 			self.balanceDB.put(feeAddress.encode(), pickle.dumps(feeAccount))
@@ -137,18 +137,18 @@ class Database:
 		#print('address', address)
 		try:
 			senderAccount = pickle.loads(self.balanceDB.get(sender.encode()))
-			print("senderAccount:", senderAccount)
+			#print("senderAccount:", senderAccount)
 		except:
 			return False
 		#sender part
-		senderAccount['balance']['cic'] -= float(fee)
+		senderAccount['balance']['cic'] -= int(fee)
 		
 
 		for coin in transaction['out']:
-			senderAccount['balance'][coin] -= float(transaction['out'][coin])
+			senderAccount['balance'][coin] -= int(transaction['out'][coin])
 		senderAccount['nonce'] += 1
 		
-		currName = pickle.loads(self.balanceDB.get('name'.encode()))
+		currName = pickle.loads(self.balanceDB.get(con["tokenName"].encode()))
 		if 'input' in transaction:
 			print('input:',transaction['input'])
 			if len(transaction['input']) > 7:
@@ -157,11 +157,11 @@ class Database:
 				if msg[:4] == '90f4':
 					name = msg[4:7]
 					try:
-						amount = float(msg[7:])
+						amount = int(msg[7:])
 					except:
 						return False
 					requiredFee = 10
-					if float(transaction['out']['cic']) < requiredFee:
+					if int(transaction['out']['cic']) < requiredFee:
 						return False
 					if transaction['to'] != feeAddress:
 						return False
@@ -169,22 +169,22 @@ class Database:
 						return False
 				currName.append(name)
 				senderAccount['balance'][name] += amount
-		print("senderAccount:", senderAccount)
+		print("senderAccount:", int(senderAccount['balance']['cic']))
 		print("currName:", currName)
 		receiver = transaction["to"]
 		try:
 			self.balanceDB.put(sender.encode(), pickle.dumps(senderAccount))
-			self.balanceDB.put('name'.encode(), pickle.dumps(currName))
+			self.balanceDB.put(con["tokenName"].encode(), pickle.dumps(currName))
 		except:
 			return False
 		try:
 			receiverAccount = pickle.loads(self.balanceDB.get(receiver.encode()))
 		except:
-			receiverAccount = {'address':receiver,'balance':defaultdict(float),'nonce':0}
+			receiverAccount = {'address':receiver,'balance':defaultdict(int),'nonce':0}
 		print("receiverAccount:", receiverAccount)
 		#receiver part
 		for coin in transaction['out']:
-			receiverAccount['balance'][coin] += float(transaction['out'][coin])		
+			receiverAccount['balance'][coin] += int(transaction['out'][coin])		
 		try:
 			self.balanceDB.put(receiver.encode(), pickle.dumps(receiverAccount))
 			return True

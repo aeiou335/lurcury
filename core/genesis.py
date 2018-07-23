@@ -18,7 +18,7 @@ class Genesis:
             "hash":"AC66D1839E1B79F1FB22181B70237F1E45E3D95A512A0790C216328CA2631674",
             "extraData":"",
             "ParentHash":"",
-            "transaction":[{"to":"cxfcb42deca97e4e8339e0b950ba5efa368fe71a55",
+            "transaction":[{"to":"cxa65cfc9af6b7daae5811836e1b49c8d2570c9387",
                             "out":{"cic":"5000000000000000000000000000","now":"100000000"},
                             "nonce":"1",
                             "fee":"1"}]

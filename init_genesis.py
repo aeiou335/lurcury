@@ -20,16 +20,16 @@ db.blockDB.deleteAll()
 db.transactionDB.deleteAll()
 db.rootDB.deleteAll()
 db.balanceDB.deleteAll()
-genesisAccount = {"address":'cxa65cfc9af6b7daae5811836e1b49c8d2570c9387', "balance":defaultdict(float), "nonce":0}
+genesisAccount = {"address":'cxa65cfc9af6b7daae5811836e1b49c8d2570c9387', "balance":defaultdict(int), "nonce":0}
 genesisAccount['balance']['cic'] = 5000000000000000000000000000
 db.balanceDB.put('cxa65cfc9af6b7daae5811836e1b49c8d2570c9387'.encode(), pickle.dumps(genesisAccount))
 feeAddr = config["feeAddress"]
-feeAccount = {"address": feeAddr, "balance":defaultdict(float), "nonce":0}
+feeAccount = {"address": feeAddr, "balance":defaultdict(int), "nonce":0}
 feeAccount['balance']['cic'] = 1000
 db.balanceDB.put(feeAddr.encode(), pickle.dumps(feeAccount))
-db.balanceDB.put('name'.encode(), pickle.dumps(['cic', 'now']))
+db.balanceDB.put(config["tokenName"].encode(), pickle.dumps(['cic', 'now']))
 db.createBlock(genesisBlock)
-print("test:",pickle.loads(db.balanceDB.get(feeAddr.encode())))
+
 #key = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(38))
 
 key = '97ddae0f3a25b92268175400149d65d6887b9cefaf28ea2c078e05cdc15a3c0a'
@@ -72,7 +72,7 @@ headers = {'Content-Type':'application/json'}
 r = requests.post('http://192.168.0.178:9000', headers = headers, data = json.dumps(data))
 #print(r.text)
 print((time.time()-t))
-
+print("test:",int(pickle.loads(db.balanceDB.get('cxa65cfc9af6b7daae5811836e1b49c8d2570c9387'.encode()))['balance']['cic']))
 """
 {'privateKey': '8c1eba13a46fd0e18ee22e5e3da7cf139977090040622a83', 'version': '1', 
 'address': 'cx6e3d4550ef058740705ebc7fcf392379c72f11fc', 'type': 'cic', 

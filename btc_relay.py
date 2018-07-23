@@ -69,14 +69,11 @@ class bitcoinInfo:
 		#	t = json.loads(r.text[:1000000000])
 		#except:
 		#	return False, 0, ""
-		print(t)
+		#print(t)
 		transactions = t['vout']
 		flag = False
 		value = 0
-		try:
-			address = t["vin"][0]["addr"]
-		except:
-			return False, 0, ""
+		address = ""
 		for i, transaction in enumerate(transactions):
 			#print(transaction)
 			if i < len(transactions)-1:
@@ -86,6 +83,10 @@ class bitcoinInfo:
 					else:
 						value = transaction['value']
 						flag = True
+						txid = t["vin"][0]["txid"]
+						out = t["vin"][0]["vout"]
+						originalt = json.loads(bitcoinRPC.transaction(txid))["result"]
+						address = originalt["vout"][out]["scriptPubKey"]["addresses"][0]
 				except:
 					continue
 			#elif i == len(transactions)-1 and flag:
@@ -110,7 +111,7 @@ class bitcoinInfo:
 			return False
 
 	def blockTransaction(): 
-		r = bitcoinRPC.blockInfo("433233")
+		r = bitcoinRPC.blockInfo("533233")
 		#r = bitcoinInfo.blockInfo("93214") 
 		#print(r) 
 		z = json.loads(r) 
@@ -135,7 +136,7 @@ class bitcoinInfo:
 			if flag:
 				transaction = {
 					"to": address,
-					"out": {"btr": str(float(value)*10e8)},
+					"out": {"btr": str(int(float(value)*10e7))},
 					"nonce":"2",
 				    "fee":"10",
 				    "type":"btc",
