@@ -28,7 +28,7 @@ def main():
 		fntdb.createBlock(genesisBlock)
 	else:
 		#while True:
-		for j in range(2):
+		for j in range(3):
 			time.sleep(2)
 			newBlock = Block.block()
 			transactions = []

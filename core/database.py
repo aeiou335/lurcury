@@ -24,9 +24,11 @@ class Database:
 		
 	def pendingTransaction(self, newTransaction):
 		#Insert newTransaction which hasn't verified into the database
-		key = b'1234567'
+		con = config.config()
+		key = con['pendingTransaction']
+		print("pendingKey:", key)
 		try:
-			pending = pickle.loads(self.transactionDB.get(key))
+			pending = pickle.loads(self.transactionDB.get(key.encode()))
 		except:
 			pending = []
 		#print(len(pending))
@@ -45,39 +47,41 @@ class Database:
 		if not flag:
 			pending.append(newTransaction)
 		"""
-		try:
+		#try:
 			#print('dumps',pickle.dumps(pending))
-			self.transactionDB.put(key, pickle.dumps(pending))
-			#print(self.transactionDB.get(key))
-			return True
-		except:
-			return False
+		self.transactionDB.put(key.encode(), pickle.dumps(pending))
+		print(self.transactionDB.get(key.encode()))
+		return True
+		#except:
+		#	return False
 
 	def getPendingTransaction(self):
 		#Return the pending transaction with the largest fee
-		key = b'1234567'
-		pendingTransaction = pickle.loads(self.transactionDB.get(key))
+		con = config.config()
+		key = con['pendingTransaction']
+		print(key)
+		pendingTransaction = pickle.loads(self.transactionDB.get(key.encode()))
 		if len(pendingTransaction) == 0:
 			return {}
 		else:
 			newTransaction = pendingTransaction.pop(0)
 		print(len(pendingTransaction))
-		self.transactionDB.put(key, pickle.dumps(pendingTransaction))
+		self.transactionDB.put(key.encode(), pickle.dumps(pendingTransaction))
 		return newTransaction
 
 	def verifyBalanceAndNonce(self, transaction):
 		#Verify whether the balance of the account is enough and the nonce is correct
 		#Return true if everything is correct, else false
 		try:
-			if transaction.type == "btc":
+			if transaction['type'] == "btc":
 				address = Key_c.bitcoinaddress(transaction["publicKey"])
-			elif transaction.type == "eth":
+			elif transaction['type'] == "eth":
 				address = Key_c.ethereumaddress(transaction["publicKey"])
 			else:
 				address = Key_c.address(transaction["publicKey"])
 		except:
 			address = Key_c.address(transaction["publicKey"])
-		#print('address:',address)
+		print('address:',address)
 		#address = 'ilwOop'
 		try:
 			accountData = pickle.loads(self.balanceDB.get(address.encode()))
@@ -85,23 +89,22 @@ class Database:
 		except:
 			print('accounterror')
 			return False
-		try:
-			for coin in transaction['out']:
-				if accountData['balance'][coin] < int(transaction['out'][coin]):
-					print('coinerror')
-					return False
-
-			if 'cic' in transaction['out']:
-				cic = int(transaction['out']['cic'])
-			else:
-				cic = 0
-			if accountData['balance']['cic'] < cic + int(transaction['fee']):
-				print('feeerror')
+		#try:
+		for coin in transaction['out']:
+			if accountData['balance'][coin] < float(transaction['out'][coin]):
+				print('coinerror')
 				return False
-				
-		except:
-			print('idk')
+		if 'cic' in transaction['out']:
+			cic = int(transaction['out']['cic'])
+		else:
+			cic = 0
+		if accountData['balance']['cic'] < cic + int(transaction['fee']):
+			print('feeerror')
 			return False
+				
+		#except:
+		#	print('idk')
+		#	return False
 		print(accountData['nonce'], int(transaction['nonce']))
 		if accountData['nonce']+1 != int(transaction['nonce']):
 			return False
@@ -110,30 +113,39 @@ class Database:
 
 	def updateBalanceAndNonce(self, transaction):
 		#Update the balance after if the transaction has been verified
-
-		feeAddress = 'cx68c59720de07e4fdc28efab95fa04d2d1c5a2fc1'
+		con = config.config()
+		feeAddress = con["feeAddress"]
 		fee = transaction['fee']
 		feeAccount = pickle.loads(self.balanceDB.get(feeAddress.encode()))
-
-		receiver = transaction["to"]
+		feeAccount['balance']['cic'] += int(fee)
+		print("feeAccount:", feeAccount)
 		try:
-			receiverAccount = pickle.loads(self.balanceDB.get(receiver.encode()))
-		except:
-			receiverAccount = {'address':receiver,'balance':defaultdict(int),'nonce':0}
-		
-		sender = Key_c.address(transaction["publicKey"])
-		#sender = 'ilwOop'
-		try:
-			senderAccount = pickle.loads(self.balanceDB.get(sender.encode()))
+			self.balanceDB.put(feeAddress.encode(), pickle.dumps(feeAccount))
 		except:
 			return False
 
+		try:
+			if transaction['type'] == "btc":
+				sender = Key_c.bitcoinaddress(transaction["publicKey"])
+			elif transaction['type'] == "eth":
+				sender = Key_c.ethereumaddress(transaction["publicKey"])
+			else:
+				sender = Key_c.address(transaction["publicKey"])
+		except:
+			sender = Key_c.address(transaction["publicKey"])
+		#sender = 'ilwOop'
+		#print('address', address)
+		try:
+			senderAccount = pickle.loads(self.balanceDB.get(sender.encode()))
+			print("senderAccount:", senderAccount)
+		except:
+			return False
+		#sender part
 		senderAccount['balance']['cic'] -= int(fee)
-		feeAccount['balance']['cic'] += int(fee)
+		
 
 		for coin in transaction['out']:
-			senderAccount['balance'][coin] -= int(transaction['out'][coin])
-			receiverAccount['balance'][coin] += int(transaction['out'][coin])
+			senderAccount['balance'][coin] -= float(transaction['out'][coin])
 		senderAccount['nonce'] += 1
 		
 		currName = pickle.loads(self.balanceDB.get('name'.encode()))
@@ -144,7 +156,10 @@ class Database:
 				print('msg:', msg)
 				if msg[:4] == '90f4':
 					name = msg[4:7]
-					amount = int(msg[7:])
+					try:
+						amount = int(msg[7:])
+					except:
+						return False
 					requiredFee = 10
 					if int(transaction['out']['cic']) < requiredFee:
 						return False
@@ -154,13 +169,24 @@ class Database:
 						return False
 				currName.append(name)
 				senderAccount['balance'][name] += amount
-
 		print("senderAccount:", senderAccount)
-		print("currName:", currName)		
+		print("currName:", currName)
+		receiver = transaction["to"]
 		try:
 			self.balanceDB.put(sender.encode(), pickle.dumps(senderAccount))
-			self.balanceDB.put(receiver.encode(), pickle.dumps(receiverAccount))
 			self.balanceDB.put('name'.encode(), pickle.dumps(currName))
+		except:
+			return False
+		try:
+			receiverAccount = pickle.loads(self.balanceDB.get(receiver.encode()))
+		except:
+			receiverAccount = {'address':receiver,'balance':defaultdict(int),'nonce':0}
+		print("receiverAccount:", receiverAccount)
+		#receiver part
+		for coin in transaction['out']:
+			receiverAccount['balance'][coin] += float(transaction['out'][coin])		
+		try:
+			self.balanceDB.put(receiver.encode(), pickle.dumps(receiverAccount))
 			return True
 		except:
 			return False

@@ -149,7 +149,7 @@ class Handler(BaseHTTPRequestHandler):
 			
 		self.end_headers()
 		#print("post_values:", post_values)
-		print('test')
+		#print('test')
 		post_return = {}
 		post_return['method'] = method
 		post_return['result'] = value

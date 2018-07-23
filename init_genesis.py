@@ -2,6 +2,7 @@ from core.database import Database
 from core.transaction import Transaction
 from core.block import Block
 from core.genesis import Genesis
+from config import config
 import json
 import time
 import pickle
@@ -13,7 +14,7 @@ from crypto.basic import *
 genesisBlock = Genesis.genesis()
 firstTransaction = genesisBlock['transaction'][0]
 #print(firstTransaction["to"], firstTransaction["out"])
-
+config = config.config()
 db = Database()
 db.blockDB.deleteAll()
 db.transactionDB.deleteAll()
@@ -22,12 +23,13 @@ db.balanceDB.deleteAll()
 genesisAccount = {"address":'cxa65cfc9af6b7daae5811836e1b49c8d2570c9387', "balance":defaultdict(int), "nonce":0}
 genesisAccount['balance']['cic'] = 5000000000000000000000000000
 db.balanceDB.put('cxa65cfc9af6b7daae5811836e1b49c8d2570c9387'.encode(), pickle.dumps(genesisAccount))
-feeAccount = {"address": "cx68c59720de07e4fdc28efab95fa04d2d1c5a2fc1", "balance":defaultdict(int), "nonce":0}
+feeAddr = config["feeAddress"]
+feeAccount = {"address": feeAddr, "balance":defaultdict(int), "nonce":0}
 feeAccount['balance']['cic'] = 1000
-db.balanceDB.put('cx68c59720de07e4fdc28efab95fa04d2d1c5a2fc1'.encode(), pickle.dumps(feeAccount))
+db.balanceDB.put(feeAddr.encode(), pickle.dumps(feeAccount))
 db.balanceDB.put('name'.encode(), pickle.dumps(['cic', 'now']))
 db.createBlock(genesisBlock)
-print('block 0:',db.getBlockByID(0))
+print("test:",pickle.loads(db.balanceDB.get(feeAddr.encode())))
 #key = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(38))
 
 key = '97ddae0f3a25b92268175400149d65d6887b9cefaf28ea2c078e05cdc15a3c0a'
@@ -54,20 +56,21 @@ for i in range(9):
 	r = requests.post('http://192.168.0.178:9000', headers = headers, data = json.dumps(data))
 	#print(r.text)
 #newKey = '975c778b9d3cb2f40539dea7a5b75ee6973f72bf46ec83130b0255cb467879aa'
-
+feeKey = '4f269e92bde3b00f9b963d665630445b297e2e8d29987b1d50d1e8785372e393'
 transaction = {
 	'fee': '100',
-	'to': 'cx68c59720de07e4fdc28efab95fa04d2d1c5a2fc1',
+	'to': feeAddr,
 	'out': {'cic':'100'},
-	'nonce': '10',
-	'type': 'cic',
-	'input': '90f4god100000000'
+	'nonce': '1',
+	'type': 'btc',
+	'input': '90f4btr2100000000000000'
 }
 
-transaction = Transaction.newTransaction(transaction, key)
+transaction = Transaction.newTransaction(transaction, feeKey)
 data = {'method':'sendTransaction', 'param':[transaction]}
 headers = {'Content-Type':'application/json'}
 r = requests.post('http://192.168.0.178:9000', headers = headers, data = json.dumps(data))
+#print(r.text)
 print((time.time()-t))
 
 """
