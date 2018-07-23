@@ -74,7 +74,7 @@ class Key_c:
         hash_key = binascii.unhexlify(key) 
         checksum = hashlib.sha256(hashlib.sha256(hash_key).digest()).digest()[:4] 
         key = key + binascii.hexlify(checksum) 
-        return str(base58.b58encode(binascii.unhexlify(key)),'ascii').lower()
+        return str(base58.b58encode(binascii.unhexlify(key)),'ascii')
     def exp():
         f = Key_c.privateKey()
         f2 = Key_c.publicKey(f)
@@ -96,18 +96,19 @@ class signature_c:
         x = signature.sign("blahblah","24ac4b12bbb37e5b1e59830c7e376f1963b9cacb4233fa53")
         h = signature.verify(x,b("blahblah"),key.publicKey("24ac4b12bbb37e5b1e59830c7e376f1963b9cacb4233fa53"))
         return h
-#print(Key_c.bitcoinkey("5KUEwxHXTyWPoE6SLeomvqUQmN6o63Hzu7YFC9K6A4NKXh75QCr"))
-'''
+
+print(Key_c.bitcoinkey("5KUEwxHXTyWPoE6SLeomvqUQmN6o63Hzu7YFC9K6A4NKXh75QCr"))
+
 h = Key_c.privateKey()
 print(h)
 print(Key_c.publicKey(h))
 t = Key_c.bitcoinaddress(Key_c.publicKey(h))
 
 print(t)
-#print(Key_c.publicKey("97ddae0f3a25b92268175400149d65d6887b9cefaf28ea2c078e05cdc15a3c0a"))
-#print(Key_c.address("7b83ad6afb1209f3c82ebeb08c0c5fa9bf6724548506f2fb4f991e2287a77090177316ca82b0bdf70cd9dee145c3002c0da1d92626449875972a27807b73b42e"))
+print(Key_c.publicKey("97ddae0f3a25b92268175400149d65d6887b9cefaf28ea2c078e05cdc15a3c0a"))
+print(Key_c.address("7b83ad6afb1209f3c82ebeb08c0c5fa9bf6724548506f2fb4f991e2287a77090177316ca82b0bdf70cd9dee145c3002c0da1d92626449875972a27807b73b42e"))
 print("ethadd:",Key_c.ethereumaddress(Key_c.publicKey(h)))
-'''
+
 #r = signature_c.sign("123",Key_c.bitcoinkey("5KUEwxHXTyWPoE6SLeomvqUQmN6o63Hzu7YFC9K6A4NKXh75QCr"))
 
 #print("r",r)

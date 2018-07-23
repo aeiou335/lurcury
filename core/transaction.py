@@ -44,7 +44,7 @@ class Code:
             trans["fee"]="0"+trans["fee"]
         re = re+trans["fee"]
         re = re+reToken
-        re = re+str(len(trans["to"]))+trans["to"].lower()
+        re = re+str(len(trans["to"]))+trans["to"]
         re = re+trans["type"]
         try:
             re = re+trans["input"]
