@@ -74,7 +74,7 @@ class Key_c:
         hash_key = binascii.unhexlify(key) 
         checksum = hashlib.sha256(hashlib.sha256(hash_key).digest()).digest()[:4] 
         key = key + binascii.hexlify(checksum) 
-        return str(base58.b58encode(binascii.unhexlify(key)),'ascii')
+        return str(base58.b58encode(binascii.unhexlify(key)),'ascii').lower()
     def exp():
         f = Key_c.privateKey()
         f2 = Key_c.publicKey(f)
