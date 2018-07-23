@@ -9,28 +9,29 @@ import MerklePatriciaTrie as MPT
 sys.path.append('core')
 from transaction import Transaction
 
-class bitcoinRPC: 
-    def blockInfo(num): 
-        r = requests.post(url='http://192.168.51.33:8332', 
-                        data='{"jsonrpc": "1.0", "id":"curltest", "method": "getblockhash", "params": ['+str(num)+'] }', 
-                        headers={"content-type": "text/plain"}, 
-                        auth=('bitcoinrpc', 'bitcoinrpctest') 
-                        ) 
-        z = json.loads(r.text[:1000000000]) 
-        t = requests.post(url='http://192.168.51.33:8332', 
-                        data='{"jsonrpc": "1.0", "id":"curltest", "method": "getblock", "params": ['+str(z)+'] }', 
-                        headers={"content-type": "text/plain"}, 
-                        auth=('bitcoinrpc', 'bitcoinrpctest') 
-                        ) 
-        #print(t.text[:1000000000]) 
-        return(t.text[:1000000000]) 
-    def transaction(hes): 
-        t = requests.post(url='http://192.168.51.33:8332', 
-                        data='{"jsonrpc": "1.0", "id":"curltest", "method": "getrawtransaction", "params": ["'+hes+'", true] }', 
-                        headers={"content-type": "text/plain"}, 
-                        auth=('bitcoinrpc', 'bitcoinrpctest') 
-                        ) 
-        #print(t.text[:1000000000]) 
+class bitcoinRPC:
+    def blockInfo(num):
+        r = requests.post(url='http://192.168.51.33:8332',
+                                data='{"jsonrpc": "1.0", "id":"curltest", "method": "getblockhash", "params": ['+str(num)+'] }',
+                                headers={"content-type": "text/plain"},
+                                auth=('bitcoinrpc', 'bitcoinrpctest')
+                                )
+        z = json.loads(r.text[:1000000000])
+        #print(z)
+        t = requests.post(url='http://192.168.51.33:8332',
+                                data='{"jsonrpc": "1.0", "id":"curltest", "method": "getblock", "params": ["'+z["result"]+'"] }',
+                                headers={"content-type": "text/plain"},
+                                auth=('bitcoinrpc', 'bitcoinrpctest')
+                                )
+        #print(t.text[:1000000000])
+        return(t.text[:1000000000])
+    def transaction(hes):
+        t = requests.post(url='http://192.168.51.33:8332',
+                                data='{"jsonrpc": "1.0", "id":"curltest", "method": "getrawtransaction", "params": ["'+hes+'", true] }',
+                                headers={"content-type": "text/plain"},
+                                auth=('bitcoinrpc', 'bitcoinrpctest')
+                                )
+        #print(t.text[:1000000000])
         return(t.text[:1000000000])
 
 class bitcoinInfo: 
@@ -50,7 +51,6 @@ class bitcoinInfo:
 			pending = pickle.loads(transactionDB.get(key.encode()))
 		except:
 			pending = []
-		print("pending:", pending)
 		for t in transactions:
 			pending.append(t)
 		try:
@@ -60,14 +60,16 @@ class bitcoinInfo:
 			return False
 			
 	def parseTransaction(has): 
-		ourAccount = "16Utt62JMF7sM8y6Amc9pPiutRecXsvxct"
+		ourAccount = "1DDE97w6SZpTJtxo2vj1sUK56Y29R7pBD2"
 		
-		r = requests.get("https://blockexplorer.com/api/tx/"+has) 
-		try:
-			t = json.loads(r.text[:1000000000])
-		except:
-			return False, 0, ""
-		#print(t)
+		#r = requests.get("https://blockexplorer.com/api/tx/"+has) 
+		t = bitcoinRPC.transaction(has)
+		t = json.loads(t)["result"]
+		#try:
+		#	t = json.loads(r.text[:1000000000])
+		#except:
+		#	return False, 0, ""
+		print(t)
 		transactions = t['vout']
 		flag = False
 		value = 0
@@ -97,7 +99,7 @@ class bitcoinInfo:
 		try:
 			account = pickle.loads(balanceDB.get(address.encode()))
 		except:
-			account = {'address':receiver,'balance':defaultdict(int),'nonce':0}
+			account = {'address':receiver,'balance':defaultdict(float),'nonce':0}
 		
 		account['balance']['btcRelay'] += value
 
@@ -108,10 +110,11 @@ class bitcoinInfo:
 			return False
 
 	def blockTransaction(): 
-		#r = bitcoinRPC.blockInfo("533192")
-		r = bitcoinInfo.blockInfo("93214") 
+		r = bitcoinRPC.blockInfo("433233")
+		#r = bitcoinInfo.blockInfo("93214") 
 		#print(r) 
 		z = json.loads(r) 
+		#print(z)
 		#print('haha',z["tx"])
 		"""
 		btcRelayDB = db.DB("trie/btcRelayDB")
@@ -125,10 +128,10 @@ class bitcoinInfo:
 		transactions = []
 		key = "4f269e92bde3b00f9b963d665630445b297e2e8d29987b1d50d1e8785372e393"
 		#key = '97ddae0f3a25b92268175400149d65d6887b9cefaf28ea2c078e05cdc15a3c0a'
-		for y in z["tx"]: 
+		for y in z["result"]["tx"]: 
 			print(y)
 			flag, value, address = bitcoinInfo.parseTransaction(y) 
-			print(flag, type(value), address)
+			#print(flag, type(value), address)
 			if flag:
 				transaction = {
 					"to": address,

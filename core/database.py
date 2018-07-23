@@ -33,7 +33,7 @@ class Database:
 			pending = []
 		#print(len(pending))
 		requireFee = 5
-		if int(newTransaction['fee']) > requireFee: 
+		if float(newTransaction['fee']) > requireFee: 
 			#print('new:',newTransaction)
 			pending.append(newTransaction)
 			#print('pending after append:', pending)
@@ -95,10 +95,10 @@ class Database:
 				print('coinerror')
 				return False
 		if 'cic' in transaction['out']:
-			cic = int(transaction['out']['cic'])
+			cic = float(transaction['out']['cic'])
 		else:
 			cic = 0
-		if accountData['balance']['cic'] < cic + int(transaction['fee']):
+		if accountData['balance']['cic'] < cic + float(transaction['fee']):
 			print('feeerror')
 			return False
 				
@@ -117,7 +117,7 @@ class Database:
 		feeAddress = con["feeAddress"]
 		fee = transaction['fee']
 		feeAccount = pickle.loads(self.balanceDB.get(feeAddress.encode()))
-		feeAccount['balance']['cic'] += int(fee)
+		feeAccount['balance']['cic'] += float(fee)
 		print("feeAccount:", feeAccount)
 		try:
 			self.balanceDB.put(feeAddress.encode(), pickle.dumps(feeAccount))
@@ -141,7 +141,7 @@ class Database:
 		except:
 			return False
 		#sender part
-		senderAccount['balance']['cic'] -= int(fee)
+		senderAccount['balance']['cic'] -= float(fee)
 		
 
 		for coin in transaction['out']:
@@ -157,11 +157,11 @@ class Database:
 				if msg[:4] == '90f4':
 					name = msg[4:7]
 					try:
-						amount = int(msg[7:])
+						amount = float(msg[7:])
 					except:
 						return False
 					requiredFee = 10
-					if int(transaction['out']['cic']) < requiredFee:
+					if float(transaction['out']['cic']) < requiredFee:
 						return False
 					if transaction['to'] != feeAddress:
 						return False
@@ -180,7 +180,7 @@ class Database:
 		try:
 			receiverAccount = pickle.loads(self.balanceDB.get(receiver.encode()))
 		except:
-			receiverAccount = {'address':receiver,'balance':defaultdict(int),'nonce':0}
+			receiverAccount = {'address':receiver,'balance':defaultdict(float),'nonce':0}
 		print("receiverAccount:", receiverAccount)
 		#receiver part
 		for coin in transaction['out']:

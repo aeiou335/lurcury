@@ -20,11 +20,11 @@ db.blockDB.deleteAll()
 db.transactionDB.deleteAll()
 db.rootDB.deleteAll()
 db.balanceDB.deleteAll()
-genesisAccount = {"address":'cxa65cfc9af6b7daae5811836e1b49c8d2570c9387', "balance":defaultdict(int), "nonce":0}
+genesisAccount = {"address":'cxa65cfc9af6b7daae5811836e1b49c8d2570c9387', "balance":defaultdict(float), "nonce":0}
 genesisAccount['balance']['cic'] = 5000000000000000000000000000
 db.balanceDB.put('cxa65cfc9af6b7daae5811836e1b49c8d2570c9387'.encode(), pickle.dumps(genesisAccount))
 feeAddr = config["feeAddress"]
-feeAccount = {"address": feeAddr, "balance":defaultdict(int), "nonce":0}
+feeAccount = {"address": feeAddr, "balance":defaultdict(float), "nonce":0}
 feeAccount['balance']['cic'] = 1000
 db.balanceDB.put(feeAddr.encode(), pickle.dumps(feeAccount))
 db.balanceDB.put('name'.encode(), pickle.dumps(['cic', 'now']))
