@@ -70,7 +70,7 @@ class Key_c:
         ripemd = hashlib.new('ripemd160') 
         ripemd.update(hashlib.sha256(binascii.unhexlify(pubkey)).digest()) 
         key = ripemd.digest() 
-        key = b"6F" + binascii.hexlify(key) 
+        key = b"00" + binascii.hexlify(key) 
         hash_key = binascii.unhexlify(key) 
         checksum = hashlib.sha256(hashlib.sha256(hash_key).digest()).digest()[:4] 
         key = key + binascii.hexlify(checksum) 
