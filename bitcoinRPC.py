@@ -31,11 +31,25 @@ class bitcoinRPC():
                                 auth=(self.user, self.password)
                                 )
         return(t.text[:1000000000])
+    def blocknumber(self):
+        t = requests.post(url=self.url,
+                                data='{"jsonrpc": "1.0", "id":"curltest", "method": "getblockcount" }',
+                                headers={"content-type": "text/plain"},
+                                auth=(self.user, self.password)
+                                )
+        return(t.text[:1000000000])
+    def bitcoinrpcnoneparams(self,method):
+        t = requests.post(url=self.url,
+                                data='{"jsonrpc": "1.0", "id":"curltest", "method": "'+method+'" }',
+                                headers={"content-type": "text/plain"},
+                                auth=(self.user, self.password)
+                                )
+        return(t.text[:1000000000])    
     def __init__(self):
-        self.url = "http://192.168.51.33:28332"
+        self.url = "http://192.168.51.33:8332"
         self.user = "bitcoinrpc" 
         self.password = "bitcoinrpctest"
-o = bitcoinRPC().bitcoinrpc("getblockhash","[1]")
-print(o)
-o = bitcoinRPC().bitcoinrpc("generate","[1]")
-print(o)
+#o = bitcoinRPC().bitcoinrpc("getblockhash","[1]")
+#print(o)
+#io = bitcoinRPC().blocknumber()
+#print(io)

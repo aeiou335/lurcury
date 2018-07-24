@@ -97,7 +97,7 @@ class signature_c:
         h = signature.verify(x,b("blahblah"),key.publicKey("24ac4b12bbb37e5b1e59830c7e376f1963b9cacb4233fa53"))
         return h
 
-print(Key_c.bitcoinkey("5KUEwxHXTyWPoE6SLeomvqUQmN6o63Hzu7YFC9K6A4NKXh75QCr"))
+print(Key_c.bitcoinkey("L1uyy5qTuGrVXrmrsvHWHgVzW9kKdrp27wBC7Vs6nZDTF2BRUVwy"))
 
 h = Key_c.privateKey()
 print(h)
