@@ -24,13 +24,15 @@ class identity:
             assert(wif is not None),"Missing argument: key!"
             self.privkey_wif = b(wif) if isinstance(wif,str) else wif
             self.privkey = self.wif2privkey()
+            self.get_privkey()
         else:
-            self.privkey = b(priv) if isinstance(private_key,str) else private_key
+            self.privkey = b(private_key) if isinstance(private_key,str) else private_key
             if wif is None: 
                 self.privkey_wif = self.privkey2wif() 
             else:
                 self.privkey_wif = b(wif) if isinstance(wif,str) else wif
 
+        key = str(self.privkey)
         self.signkey = ecdsa.SigningKey.from_string(self.privkey, curve=ecdsa.SECP256k1)
         self.verkey = self.signkey.get_verifying_key()
         self.pubkey = binascii.hexlify(self.verkey.to_string()) #pubkey
@@ -70,7 +72,17 @@ class identity:
         return self.encrypt(self.privkey, b"80")
 
     def wif2privkey(self):
-        return base58.b58decode_check(self.privkey_wif)[1:]
+        print(str(self.privkey_wif)[0])
+        ad = base58.b58decode_check(self.privkey_wif)
+        print(str(binascii.hexlify(ad), 'ascii'))
+
+        if str(self.privkey_wif,'ascii')[0]=='K' or str(self.privkey_wif,'ascii')[0]=='L':
+            print('ah ha!')
+            return ad[1:-1]
+        else:
+            print('uh oh ')
+            return ad[1:]
+
 
     def encrypt(self, key, ad):
         key = ad + binascii.hexlify(key)
@@ -106,7 +118,7 @@ if __name__ == "__main__":
     print("public key: ", unit.get_pubkey())
     print("address:", unit.get_addr())
     '''
-    
+    '''
     pk = '5JdFN2jJvC9bCuN4F9i93RkDqBDBqcyinpzBRmnW8xXiXsnGmHT'
     data = "this is a bunch of test messages"
     unit = identity()
@@ -119,9 +131,12 @@ if __name__ == "__main__":
     sig = unit.sign_data(data)
     print("signed data: ", str(sig, 'ascii'))
     print("verifying: ", unit.verify_data(sig, data))
-    
+    '''
+    wif = 'L1uyy5qTuGrVXrmrsvHWHgVzW9kKdrp27wBC7Vs6nZDTF2BRUVwy'
+    #wif = '5HueCGU8rMjxEXxiPuD5BDku4MkFqeZyd4dZ1jvhTVqvbTLvyTJ'
     unit2 = identity()
-    addr = unit2.pub2addr(pb)
+    unit2.init_priv(wif=wif)
+    addr = unit2.get_addr()
     print("testing new function: ", addr)
     # test2: input 32 bytes string
     '''
