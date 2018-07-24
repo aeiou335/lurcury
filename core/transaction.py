@@ -17,23 +17,6 @@ class Code:
                 #v = trans['out'][coin]
                 v="0"+v
             reToken = reToken + coin + v
-        '''
-        for coin in coins:
-            if coin in trans['out']:
-                v = trans['out'][coin]
-                for h in range(0,30-len(trans['out'][coin])):
-                    v="0"+v
-            reToken = reToken + coin + v
-        '''
-        """
-        for i,v in trans["out"].items():
-            #print(v)
-            for h in range(0,30-len(v)):
-                v="0"+v
-            print(v)
-            reToken = reToken+i+v
-            print(reToken)
-        """
         for x in range(0,30-len(trans["nonce"])):
             trans["nonce"]="0"+trans["nonce"]
         re = re+trans["nonce"]
@@ -84,14 +67,6 @@ class Code:
         re["fee"] = str(int(transaction[30:60]))
         re["out"]=[]
         outjson = {}
-        '''
-        for t in range(0,int(len(transaction[60:])/33)):
-            p = t*33
-            #re["out"].append({transaction[102+p:105+p]:str(int(transaction[105+p:135+p]))})
-            outjson[transaction[102+p:105+p]] = str(int(transaction[105+p:135+p]))
-        '''
-        #print("test",transaction[60:63])
-        #re["out"].append({"test":"123"})
         re["out"].append({transaction[60:63]:str(int(transaction[63:93]))})
         toint = int(transaction[93:95])
         print(toint)
@@ -99,9 +74,6 @@ class Code:
         #print(transaction[95+toint:])
         re["type"] = transaction[95+toint:95+toint+3]
         re["input"] = transaction[95+toint+3:95+toint+3+33]
-        #re["out"] = outjson
-        #print("ch",re)
-        #print("ch",transaction)
         return re
 
 class Transaction:
