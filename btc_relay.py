@@ -8,41 +8,10 @@ import db as db
 import MerklePatriciaTrie as MPT
 sys.path.append('core')
 from transaction import Transaction
+from bitcoinRPC import *
 
-class bitcoinRPC:
-    def blockInfo(num):
-        r = requests.post(url='http://192.168.51.33:8332',
-                                data='{"jsonrpc": "1.0", "id":"curltest", "method": "getblockhash", "params": ['+str(num)+'] }',
-                                headers={"content-type": "text/plain"},
-                                auth=('bitcoinrpc', 'bitcoinrpctest')
-                                )
-        z = json.loads(r.text[:1000000000])
-        #print(z)
-        t = requests.post(url='http://192.168.51.33:8332',
-                                data='{"jsonrpc": "1.0", "id":"curltest", "method": "getblock", "params": ["'+z["result"]+'"] }',
-                                headers={"content-type": "text/plain"},
-                                auth=('bitcoinrpc', 'bitcoinrpctest')
-                                )
-        #print(t.text[:1000000000])
-        return(t.text[:1000000000])
-    def transaction(hes):
-        t = requests.post(url='http://192.168.51.33:8332',
-                                data='{"jsonrpc": "1.0", "id":"curltest", "method": "getrawtransaction", "params": ["'+hes+'", true] }',
-                                headers={"content-type": "text/plain"},
-                                auth=('bitcoinrpc', 'bitcoinrpctest')
-                                )
-        #print(t.text[:1000000000])
-        return(t.text[:1000000000])
 
 class bitcoinInfo: 
-	def blockInfo(num):
-		r = requests.get("https://blockexplorer.com/api/block-index/"+num) 
-		z = json.loads(r.text[:1000000000]) 
-		#print(z["blockHash"]) 
-		t = requests.get("https://blockexplorer.com/api/block/"+z["blockHash"]) 
-		#print(t.text[:1000000000]) 
-		return t.text[:1000000000]
-
 	def pendingBTCRelay(transactions):
 		transactionDB = db.DB("trie/transactionDB")
 		con = config.config()
@@ -63,7 +32,7 @@ class bitcoinInfo:
 		ourAccount = "1DDE97w6SZpTJtxo2vj1sUK56Y29R7pBD2"
 		
 		#r = requests.get("https://blockexplorer.com/api/tx/"+has) 
-		t = bitcoinRPC.transaction(has)
+		t = bitcoinRPC().transaction(has)
 		t = json.loads(t)["result"]
 		#try:
 		#	t = json.loads(r.text[:1000000000])
@@ -111,24 +80,10 @@ class bitcoinInfo:
 			return False
 
 	def blockTransaction(): 
-		r = bitcoinRPC.blockInfo("533233")
-		#r = bitcoinInfo.blockInfo("93214") 
-		#print(r) 
+		r = bitcoinRPC().blockInfo("533233")
 		z = json.loads(r) 
-		#print(z)
-		#print('haha',z["tx"])
-		"""
-		btcRelayDB = db.DB("trie/btcRelayDB")
-		rootDB = db.Db("trie/rootDB")
-		try:
-			root =  rootDB.get(b"btcRelaytrie")
-		except:
-			root = ""
-		trie = MPT.MerklePatriciaTrie(btcRelayDB, root)
-		"""
 		transactions = []
 		key = "4f269e92bde3b00f9b963d665630445b297e2e8d29987b1d50d1e8785372e393"
-		#key = '97ddae0f3a25b92268175400149d65d6887b9cefaf28ea2c078e05cdc15a3c0a'
 		for y in z["result"]["tx"]: 
 			print(y)
 			flag, value, address = bitcoinInfo.parseTransaction(y) 
@@ -156,17 +111,4 @@ class bitcoinInfo:
 	
 
 print(bitcoinInfo.blockTransaction())
-"""
-trandb = db.DB("trie/transactionDB")
-con = config.config()
-key = con["pendingTransaction"]
 
-print(pickle.loads(trandb.get(key.encode())))
-
-{ 
-	"to": "1DoZKq5EwmRpSEGqaZZJWKQ35ncPHDLGD4", 
-	"out": {"cic":"100"},
-	"reviewer":["cx"],
-	"sign":[""]
-}
-"""

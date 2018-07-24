@@ -89,7 +89,7 @@ def parseBlock(info, sql, conn):
  		
  
 def main():
-	sql,conn = pysql.sqlcon('192.168.51.11','bc_developer','d!tRv36B','BlockChain')
+	sql,conn = pysql.sqlcon('','','','')
 	num = 10
 	
 	threads = []
