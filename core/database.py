@@ -21,7 +21,7 @@ class Database:
 		self.transactionDB = db.DB('trie/transactionDB')
 		self.blockDB = db.DB('trie/blockDB')
 		self.rootDB = db.DB('trie/rootDB')
-		
+		self.configDB = db.DB('trie/configDB')
 	def pendingTransaction(self, newTransaction):
 		#Insert newTransaction which hasn't verified into the database
 		con = config.config()
@@ -59,13 +59,14 @@ class Database:
 		#Return the pending transaction with the largest fee
 		con = config.config()
 		key = con['pendingTransaction']
-		print(key)
+		#print(key)
 		pendingTransaction = pickle.loads(self.transactionDB.get(key.encode()))
+		print("pendingTransaction:", pendingTransaction)
 		if len(pendingTransaction) == 0:
 			return {}
 		else:
 			newTransaction = pendingTransaction.pop(0)
-		print(len(pendingTransaction))
+		#print(len(pendingTransaction))
 		self.transactionDB.put(key.encode(), pickle.dumps(pendingTransaction))
 		return newTransaction
 
