@@ -26,7 +26,7 @@ class Database:
 		#Insert newTransaction which hasn't verified into the database
 		con = config.config()
 		key = con['pendingTransaction']
-		print("pendingKey:", key)
+		#print("pendingKey:", key)
 		try:
 			pending = pickle.loads(self.transactionDB.get(key.encode()))
 		except:
@@ -39,21 +39,11 @@ class Database:
 			#print('pending after append:', pending)
 		else: 
 			return False
-		"""
-		flag = False
-		#print(newTransaction)
-		for idx, transaction in enumerate(pending):
-			if newTransaction['fee'] < transaction['fee']:
-		if not flag:
-			pending.append(newTransaction)
-		"""
-		#try:
-			#print('dumps',pickle.dumps(pending))
-		self.transactionDB.put(key.encode(), pickle.dumps(pending))
-		print(self.transactionDB.get(key.encode()))
-		return True
-		#except:
-		#	return False
+		try:
+			self.transactionDB.put(key.encode(), pickle.dumps(pending))
+			return True
+		except:
+			return False
 
 	def getPendingTransaction(self):
 		#Return the pending transaction with the largest fee

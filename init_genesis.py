@@ -61,10 +61,15 @@ def init_transaction():
 		
 		#print(transaction['txid'])
 		transactions.append(transaction)
+		flag = db.pendingTransaction(transaction)
+		if not flag:
+			print("Something wrong!")
+		"""
 		data = {'method':'sendTransaction', 'param':[transaction]}
 		headers = {'Content-Type':'application/json'}
 		r = requests.post('http://127.0.0.1:9000', headers = headers, data = json.dumps(data))
 		#print(r.text)
+		"""
 	#newKey = '975c778b9d3cb2f40539dea7a5b75ee6973f72bf46ec83130b0255cb467879aa'
 	feeKey = '4f269e92bde3b00f9b963d665630445b297e2e8d29987b1d50d1e8785372e393'
 	transaction = {
@@ -77,12 +82,16 @@ def init_transaction():
 	}
 
 	transaction = Transaction.newTransaction(transaction, feeKey)
+	flag = db.pendingTransaction(transaction)
+	if not flag:
+		print("Something wrong!")
+	"""
 	data = {'method':'sendTransaction', 'param':[transaction]}
 	headers = {'Content-Type':'application/json'}
 	r = requests.post('http://127.0.0.1:9000', headers = headers, data = json.dumps(data))
 	#print(r.text)
+	"""
 	print((time.time()-t))
-	print("test:",int(pickle.loads(db.balanceDB.get('cxa65cfc9af6b7daae5811836e1b49c8d2570c9387'.encode()))['balance']['cic']))
 
 def main():
 	clearAllDB()
