@@ -63,7 +63,7 @@ def init_transaction():
 		transactions.append(transaction)
 		data = {'method':'sendTransaction', 'param':[transaction]}
 		headers = {'Content-Type':'application/json'}
-		r = requests.post('http://192.168.0.178:9000', headers = headers, data = json.dumps(data))
+		r = requests.post('http://127.0.0.1:9000', headers = headers, data = json.dumps(data))
 		#print(r.text)
 	#newKey = '975c778b9d3cb2f40539dea7a5b75ee6973f72bf46ec83130b0255cb467879aa'
 	feeKey = '4f269e92bde3b00f9b963d665630445b297e2e8d29987b1d50d1e8785372e393'
@@ -79,7 +79,7 @@ def init_transaction():
 	transaction = Transaction.newTransaction(transaction, feeKey)
 	data = {'method':'sendTransaction', 'param':[transaction]}
 	headers = {'Content-Type':'application/json'}
-	r = requests.post('http://192.168.0.178:9000', headers = headers, data = json.dumps(data))
+	r = requests.post('http://127.0.0.1:9000', headers = headers, data = json.dumps(data))
 	#print(r.text)
 	print((time.time()-t))
 	print("test:",int(pickle.loads(db.balanceDB.get('cxa65cfc9af6b7daae5811836e1b49c8d2570c9387'.encode()))['balance']['cic']))
