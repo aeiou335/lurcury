@@ -15,20 +15,14 @@ from basic import *
 #from crypto import basic
 
 class Database:
-	def __init__(self):
-		#self.pendingTransactionDB = db.DB('pendingTransactionDB')
-		self.balanceDB = db.DB('trie/balanceDB')
-		self.transactionDB = db.DB('trie/transactionDB')
-		self.blockDB = db.DB('trie/blockDB')
-		self.rootDB = db.DB('trie/rootDB')
-		self.configDB = db.DB('trie/configDB')
-	def pendingTransaction(self, newTransaction):
+	def pendingTransaction(newTransaction):
 		#Insert newTransaction which hasn't verified into the database
+		transactionDB = db.DB("trie/transactionDB")
 		con = config.config()
 		key = con['pendingTransaction']
 		#print("pendingKey:", key)
 		try:
-			pending = pickle.loads(self.transactionDB.get(key.encode()))
+			pending = pickle.loads(transactionDB.get(key.encode()))
 		except:
 			pending = []
 		#print(len(pending))
@@ -40,29 +34,31 @@ class Database:
 		else: 
 			return False
 		try:
-			self.transactionDB.put(key.encode(), pickle.dumps(pending))
+			transactionDB.put(key.encode(), pickle.dumps(pending))
 			return True
 		except:
 			return False
 
-	def getPendingTransaction(self):
+	def getPendingTransaction():
 		#Return the pending transaction with the largest fee
+		transactionDB = db.DB("trie/transactionDB")
 		con = config.config()
 		key = con['pendingTransaction']
 		#print(key)
-		pendingTransaction = pickle.loads(self.transactionDB.get(key.encode()))
+		pendingTransaction = pickle.loads(transactionDB.get(key.encode()))
 		#print("pendingTransaction:", pendingTransaction)
 		if len(pendingTransaction) == 0:
 			return {}
 		else:
 			newTransaction = pendingTransaction.pop(0)
 		#print(len(pendingTransaction))
-		self.transactionDB.put(key.encode(), pickle.dumps(pendingTransaction))
+		transactionDB.put(key.encode(), pickle.dumps(pendingTransaction))
 		return newTransaction
 
-	def verifyBalanceAndNonce(self, transaction):
+	def verifyBalanceAndNonce(transaction):
 		#Verify whether the balance of the account is enough and the nonce is correct
 		#Return true if everything is correct, else false
+		balanceDB = db.DB("trie/balanceDB")
 		try:
 			if transaction['type'] == "btc":
 				address = Key_c.bitcoinaddress(transaction["publicKey"])
@@ -75,7 +71,7 @@ class Database:
 		print('address:',address)
 		#address = 'ilwOop'
 		try:
-			accountData = pickle.loads(self.balanceDB.get(address.encode()))
+			accountData = pickle.loads(balanceDB.get(address.encode()))
 			print('account:', int(accountData['balance']['cic']))
 		except:
 			print('accounterror')
@@ -102,16 +98,17 @@ class Database:
 
 		return True
 
-	def updateBalanceAndNonce(self, transaction):
+	def updateBalanceAndNonce(transaction):
 		#Update the balance after if the transaction has been verified
+		balanceDB = db.DB("trie/balanceDB")
 		con = config.config()
 		feeAddress = con["feeAddress"]
 		fee = transaction['fee']
-		feeAccount = pickle.loads(self.balanceDB.get(feeAddress.encode()))
+		feeAccount = pickle.loads(balanceDB.get(feeAddress.encode()))
 		feeAccount['balance']['cic'] += int(fee)
 		print("feeAccount:", feeAccount)
 		try:
-			self.balanceDB.put(feeAddress.encode(), pickle.dumps(feeAccount))
+			balanceDB.put(feeAddress.encode(), pickle.dumps(feeAccount))
 		except:
 			return False
 
@@ -127,19 +124,18 @@ class Database:
 		#sender = 'ilwOop'
 		#print('address', address)
 		try:
-			senderAccount = pickle.loads(self.balanceDB.get(sender.encode()))
+			senderAccount = pickle.loads(balanceDB.get(sender.encode()))
 			#print("senderAccount:", senderAccount)
 		except:
 			return False
 		#sender part
 		senderAccount['balance']['cic'] -= int(fee)
 		
-
 		for coin in transaction['out']:
 			senderAccount['balance'][coin] -= int(transaction['out'][coin])
 		senderAccount['nonce'] += 1
 		
-		currName = pickle.loads(self.balanceDB.get(con["tokenName"].encode()))
+		currName = pickle.loads(balanceDB.get(con["tokenName"].encode()))
 		if 'input' in transaction:
 			print('input:',transaction['input'])
 			if len(transaction['input']) > 7:
@@ -164,12 +160,12 @@ class Database:
 		print("currName:", currName)
 		receiver = transaction["to"]
 		try:
-			self.balanceDB.put(sender.encode(), pickle.dumps(senderAccount))
-			self.balanceDB.put(con["tokenName"].encode(), pickle.dumps(currName))
+			balanceDB.put(sender.encode(), pickle.dumps(senderAccount))
+			balanceDB.put(con["tokenName"].encode(), pickle.dumps(currName))
 		except:
 			return False
 		try:
-			receiverAccount = pickle.loads(self.balanceDB.get(receiver.encode()))
+			receiverAccount = pickle.loads(balanceDB.get(receiver.encode()))
 		except:
 			receiverAccount = {'address':receiver,'balance':defaultdict(int),'nonce':0}
 		print("receiverAccount:", receiverAccount)
@@ -177,55 +173,62 @@ class Database:
 		for coin in transaction['out']:
 			receiverAccount['balance'][coin] += int(transaction['out'][coin])		
 		try:
-			self.balanceDB.put(receiver.encode(), pickle.dumps(receiverAccount))
+			balanceDB.put(receiver.encode(), pickle.dumps(receiverAccount))
 			return True
 		except:
 			return False
 
-	def createTransaction(self, transaction):
+	def createTransaction(transaction):
 		#Push transaction into database
 		#Todo: Transaction Trie
+		rootDB = db.DB("trie/rootDB")
+		transactionDB = db.DB("trie/transactionDB")
 		try:
-			root = self.rootDB.get(b'TransactionTrie')
+			root = rootDB.get(b'TransactionTrie')
 		except:
 			root = ""
-		trie = MPT.MerklePatriciaTrie(self.transactionDB, root)
+		trie = MPT.MerklePatriciaTrie(transactionDB, root)
 		trie.update(transaction['txid'], transaction)
 		new_root = trie.root_hash()
-		self.rootDB.put(b'TransactionTrie', new_root)
+		rootDB.put(b'TransactionTrie', new_root)
 	"""
 	def addTransactionToBlock(blockData, transaction):
 		#Push verified transaction into blockData
 		blockData['transaction'].append(transaction)
 		return blockData
 	"""
-	def createBlock(self, blockData):
+	def createBlock(blockData):
 		#Push block into database
 		#Todo: Block Trie
+		rootDB = db.DB("trie/rootDB")
+		blockDB = db.DB("trie/blockDB")
 		try:
-			root = self.rootDB.get(b'BlockTrie')
+			root = rootDB.get(b'BlockTrie')
 		except:
 			root = ""
 		print('root:', root)
-		trie = MPT.MerklePatriciaTrie(self.blockDB, root)
+		trie = MPT.MerklePatriciaTrie(blockDB, root)
 		trie.update(blockData['hash'], blockData)
 		new_root = trie.root_hash()
 		#print('new root:', new_root)
-		self.rootDB.put(b'BlockTrie', new_root)
+		rootDB.put(b'BlockTrie', new_root)
 
-	def getBlockNumber(self):
+	def getBlockNumber():
 		#Return current block number
+		rootDB = db.DB("trie/rootDB")
+		blockDB = db.DB("trie/blockDB")
 		try:
-			root = self.rootDB.get(b"BlockTrie")
+			root = rootDB.get(b"BlockTrie")
 			print(root)
 		except:
 			root = ""
-		trie = MPT.MerklePatriciaTrie(self.blockDB, root)
+		trie = MPT.MerklePatriciaTrie(blockDB, root)
 		return trie.id
 
-	def getBlockByID(self, idx):
+	def getBlockByID(idx):
+		blockDB = db.DB("trie/blockDB")
 		try:
-			block = self.blockDB.get(str(idx).encode())
+			block = blockDB.get(str(idx).encode())
 		except:
 			return ""
 		return pickle.loads(block)
