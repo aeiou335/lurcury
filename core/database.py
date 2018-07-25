@@ -61,7 +61,7 @@ class Database:
 		key = con['pendingTransaction']
 		#print(key)
 		pendingTransaction = pickle.loads(self.transactionDB.get(key.encode()))
-		print("pendingTransaction:", pendingTransaction)
+		#print("pendingTransaction:", pendingTransaction)
 		if len(pendingTransaction) == 0:
 			return {}
 		else:

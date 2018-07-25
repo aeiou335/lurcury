@@ -5,19 +5,7 @@ from core.genesis import Genesis
 
 import time
 import json
-#def createFakeTransaction():
-#	fakeTransaction = 
-"""
-def updateDBAccountStatus(block):
-	transactions = block['transaction']
-	if len(transactions) == 0:
-		return 0
-	for transaction in transactions:
-		if not updateBalanceAndNonce(transaction):
-			print('Something wrong when updating account status.')
-			return False
-	return True
-"""
+
 def main():
 	#fntdb = Database()
 
