@@ -107,7 +107,6 @@ class bitcoinInfo:
 					flag, value, address = bitcoinInfo.parseTransaction(y) 
 					if flag:
 						print(flag, value, address)
-					if flag:
 						currNonce += 1
 						transaction = {
 							"to": address,
@@ -135,4 +134,3 @@ class bitcoinInfo:
 	
 
 print(bitcoinInfo.blockTransaction())
-
