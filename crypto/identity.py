@@ -46,14 +46,24 @@ class identity:
         self.pub2addr(self.pubkey)
         self.pub2addr(self.pub_compressed)
 
-    def pub2addr(self, key, main=True): 
+    def pub2addr_compress(self, key, main=True): 
         #input string/bytes, output string
         self.mainnet = main
         pubkey = b(key) if isinstance(key,str) else key
+        if len(pubkey) == 130:
+            pb_comp = self.compress_pub(pubkey[2:])
+        elif len(pubkey) == 128:
+            pb_comp = self.compress_pub(pubkey)
+        else:
+            print("error!! key length neither 130 nor 128")
         ripemd = hashlib.new('ripemd160')
-        ripemd.update(hashlib.sha256(binascii.unhexlify(pubkey)).digest())
+        #ripemd.update(hashlib.sha256(binascii.unhexlify(pubkey)).digest())
+        ripemd.update(hashlib.sha256(binascii.unhexlify(pb_comp)).digest())
         key = ripemd.digest()
         ad = b"00" if self.mainnet else b"6F"
+        self.addr_compressed = self.encrypt(key,ad)
+        return self.get_addr(compressed=True)
+        '''
         if len(pubkey) == 130:
             self.addr = self.encrypt(key, ad)
             return self.get_addr(compressed=False)
@@ -62,6 +72,20 @@ class identity:
             return self.get_addr(compressed=True)
         else:
             print("Length of key incorrect, must be 130 or 66. Length: %i" % len(pubkey))
+        '''
+    def pub2addr(self, key, main=True): 
+        #input string/bytes, output string
+        #self.mainnet = main
+        pubkey = b(key) if isinstance(key,str) else key
+        if len(pubkey) == 128:
+            pubkey = b"04" + pubkey
+        ripemd = hashlib.new('ripemd160')
+        #ripemd.update(hashlib.sha256(binascii.unhexlify(pubkey)).digest())
+        ripemd.update(hashlib.sha256(binascii.unhexlify(pubkey)).digest())
+        key = ripemd.digest()
+        ad = b"00" if self.mainnet else b"6F"
+        self.addr = self.encrypt(key,ad)
+        return self.get_addr(compressed=False)
 
     def sign_data(self, data):
         assert (self.signkey is not None), "No private key provided! Init with private key first."
@@ -74,8 +98,8 @@ class identity:
         orig_data = b(orig_data)
         return self.verkey.verify(sig_data, orig_data)
     
-    def compress_pub(self):
-        portion = self.pubkey[2:]
+    def compress_pub(self, key=None):
+        portion = self.pubkey[2:] if key==None else key
         l = len(portion)
         assert l==128, "portion length wrong: %i" % l
         x = portion[:int(l/2)]
@@ -172,7 +196,7 @@ if __name__ == "__main__":
     unit = identity(pk, bin=False)
     print("private key: ", unit.get_privkey())
     print("public key: ", unit.get_pubkey())
-    print("address:", unit.get_addr())'''
+    print("address:", unit.get_addr())
     unit3 = identity(mainnet=False)
     wif = 'L3ChN4SuZpRD4oXgMyDxoVkGzxtroas5D67hdA5EmjZ82Vi9kCas'
     #wif = '5HqAEzhde6Qqc5w6Eu1yHqCkEGspdbHpbPZLYxEXicxzuAp3yhC'
@@ -186,7 +210,15 @@ if __name__ == "__main__":
     print("not compressed address: %s" % addr)
     addr_c = unit3.get_addr(True)
     print("compressed address: %s" % addr_c)
-    
+    '''
+    key = '04b8117df5139749f1e776cc06e6a32fd3b23acf975029abb827124e101a5417384edbc5aad877f55721f470c35bf910add2a4868134d4273afb42f56368bbd3f2'
+    print(len(key))
     unit4 = identity()
-    print(unit4.pub2addr('03919f9806cd4d07b588b14bcf7f5e8466d1c59f3694eb24101bbf59b91f933bfa',True))
-    print(unit4.pub2addr('03919f9806cd4d07b588b14bcf7f5e8466d1c59f3694eb24101bbf59b91f933bfa',False))
+    print("not compressed: ",unit4.pub2addr(key,True))
+    print("compressed: ",unit4.pub2addr_compress(key,True))
+    key = 'b8117df5139749f1e776cc06e6a32fd3b23acf975029abb827124e101a5417384edbc5aad877f55721f470c35bf910add2a4868134d4273afb42f56368bbd3f2'
+    print("not compressed: ",unit4.pub2addr(key,True))
+    print("compressed: ",unit4.pub2addr_compress(key,True))
+    #print(unit4.get_addr(True))
+    #print(unit4.pub2addr('03919f9806cd4d07b588b14bcf7f5e8466d1c59f3694eb24101bbf59b91f933bfa',True))
+    #print(unit4.pub2addr('03919f9806cd4d07b588b14bcf7f5e8466d1c59f3694eb24101bbf59b91f933bfa',False))
