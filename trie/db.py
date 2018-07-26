@@ -6,7 +6,7 @@
 
 #import leveldb
 import plyvel
-
+import time
 # In[ ]:
 
 
@@ -15,7 +15,10 @@ class DB:
         try:
             db = plyvel.DB(name, create_if_missing=True)
         except:
-            DB.get(name, key)
+            print("wait")
+            time.sleep(1)
+            v = DB.get(name, key)
+            return v
         value = db.get(key)
         db.close()
         assert db.closed
@@ -28,6 +31,7 @@ class DB:
         try:
             db = plyvel.DB(name, create_if_missing=True)
         except:
+            time.sleep(1)
             DB.put(name, key, value)
         db.put(key, value)
         db.close()

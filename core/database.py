@@ -62,12 +62,16 @@ class Database():
 		#balanceDB = db.DB("trie/balanceDB")
 		try:
 			if transaction['type'] == "btc":
+				print("btc")
 				address = Key_c.bitcoinaddress(transaction["publicKey"])
 			elif transaction['type'] == "eth":
+				print("eth")
 				address = Key_c.ethereumaddress(transaction["publicKey"])
 			else:
+				print("else")
 				address = Key_c.address(transaction["publicKey"])
 		except:
+			print("except")
 			address = Key_c.address(transaction["publicKey"])
 		print('address:',address)
 		#address = 'ilwOop'

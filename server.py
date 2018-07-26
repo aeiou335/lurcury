@@ -6,7 +6,7 @@ import pickle
 import sys
 sys.path.append('trie')
 import MerklePatriciaTrie as MPT
-import db.DB as db
+from db import DB as db
 sys.path.append('core')
 from database import Database
 from transaction import Transaction
@@ -23,7 +23,7 @@ class BlockTrie(object):
 class TransactionTrie(object):
 	def __init__(self, root_hash):
 		#transactionDB = db.DB("trie/transactionDB")
-		self.trie = MPT.MerklePatriciaTrie("trie/transactionDB", transactionDB, root_hash) 
+		self.trie = MPT.MerklePatriciaTrie("trie/transactionDB", root_hash) 
 
 	def search(self, key):
 		value = self.trie.search(key)
@@ -60,7 +60,7 @@ class Handler(BaseHTTPRequestHandler):
 		elif method == "getBlockbyID":
 			#idx_db = db.DB("trie/blockDB")
 			try:
-				value = pickle.loads(db.Get("trie/blockDB", str(param).encode()))
+				value = pickle.loads(db.get("trie/blockDB", str(param).encode()))
 			except:
 				value = "No such id."
 			print("value:", value)
@@ -78,11 +78,12 @@ class Handler(BaseHTTPRequestHandler):
 
 		elif method == "getAccount":
 			#balanceDB = db.DB("trie/balanceDB")
-			try:
-				value = pickle.loads(db.Get("trie/balanceDB", param.encode()))
-			except:
-				self.send_error(400, "Account doesn't exist!")
-				return 0
+			#try:
+			print(db.get("trie/balanceDB",param.encode()))
+			value = pickle.loads(db.get("trie/balanceDB", param.encode()))
+			#except:
+			#self.send_error(400, "Account doesn't exist!")
+			#return 0
 
 		else:
 			self.send_error(415, "No such method.")
@@ -91,7 +92,7 @@ class Handler(BaseHTTPRequestHandler):
 		self.send_response(200)
 		self.send_header('Content-type', 'application/json')
 		self.send_header('Access-Control-Allow-Credentials', 'true')
-		self.send_header('Access-Control-Allow-Origin', 'http://192.168.0.125:8888')
+		#self.send_header('Access-Control-Allow-Origin', 'http://192.168.0.125:8888')
 			
 		self.end_headers()
 		post_return = {}
@@ -128,12 +129,13 @@ class Handler(BaseHTTPRequestHandler):
 			#print(method)
 			required = {'to','out','nonce','fee','sign','publicKey','txid'}
 			if required <= transaction.keys():
-				if Database().pendingTransaction(transaction):
-					#print(transaction)
+				if Database.pendingTransaction(transaction):
+					print(transaction)
 					value = True
 				else:
 					value = False
 			else:
+				print("second error")
 				value = False
 		#param: []
 
@@ -155,7 +157,7 @@ class Handler(BaseHTTPRequestHandler):
 class Server_run():
     def run():
         from http.server import HTTPServer
-        server = HTTPServer(("127.0.0.1", 9000), Handler)
+        server = HTTPServer(("192.168.51.201", 9000), Handler)
         print("Starting server, use <Ctrl-C> to stop")
         server.serve_forever()  
-#run.run()
+Server_run.run()

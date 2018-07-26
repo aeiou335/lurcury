@@ -66,15 +66,8 @@ class Key_c:
         k.update(bytes().fromhex(key))
         return "0x"+k.hexdigest()[24:64]
     def bitcoinaddress(key):
-        pubkey = b"04" + b(key) 
-        ripemd = hashlib.new('ripemd160') 
-        ripemd.update(hashlib.sha256(binascii.unhexlify(pubkey)).digest()) 
-        key = ripemd.digest() 
-        key = b"00" + binascii.hexlify(key) 
-        hash_key = binascii.unhexlify(key) 
-        checksum = hashlib.sha256(hashlib.sha256(hash_key).digest()).digest()[:4] 
-        key = key + binascii.hexlify(checksum) 
-        return str(base58.b58encode(binascii.unhexlify(key)),'ascii')
+        return idendity(priv=key).get_addr()
+        #return 
     def exp():
         f = Key_c.privateKey()
         f2 = Key_c.publicKey(f)

@@ -18,7 +18,7 @@ class lurcury:
 		else:
 			while True:
 			#for j in range(3):
-				time.sleep(2)
+				#time.sleep(2)
 				newBlock = Block.block()
 				transactions = []
 				for i in range(5):
