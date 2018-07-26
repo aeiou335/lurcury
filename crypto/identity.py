@@ -81,10 +81,10 @@ class identity:
         x = portion[:int(l/2)]
         y = portion[int(l/2):]
         assert len(x)==int(l/2) and len(y)==int(l/2), "x and y wrong length!"
-        if int(binascii.hexlify(y))//2:
-            return b"02" + x
-        else:
+        if int(binascii.hexlify(y))%2:
             return b"03" + x
+        else:
+            return b"02" + x
     
     '''def pubkey2addr(self):
         pubkey = b"04" + self.pubkey
@@ -180,6 +180,7 @@ if __name__ == "__main__":
     print("address:", unit.get_addr())'''
     unit3 = identity()
     wif = 'L3ChN4SuZpRD4oXgMyDxoVkGzxtroas5D67hdA5EmjZ82Vi9kCas'
+    #wif = '5HqAEzhde6Qqc5w6Eu1yHqCkEGspdbHpbPZLYxEXicxzuAp3yhC'
     unit3.init_priv(wif=wif)
     print("privkey: %s" %(unit3.get_privkey()))
     pb1 = unit3.get_pubkey(False)
