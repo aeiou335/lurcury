@@ -11,34 +11,37 @@ import string
 import requests
 from collections import defaultdict
 from crypto.basic import *
+sys.path.append('trie')
+from db import DB as db 
 genesisBlock = Genesis.genesis()
 firstTransaction = genesisBlock['transaction'][0]
 #print(firstTransaction["to"], firstTransaction["out"])
 config = config.config()
-db = Database()
+#balanceDB = db.DB("trie/balanceDB")
+#configDB = db.DB("trie/configDB")
 
 def clearAllDB():
-	db.blockDB.deleteAll()
-	db.transactionDB.deleteAll()
-	db.rootDB.deleteAll()
-	db.balanceDB.deleteAll()
-	db.configDB.deleteAll()
+	db.deleteAll("trie/blockDB")
+	db.deleteAll("trie/transactionDB")
+	db.deleteAll("trie/rootDB")
+	db.deleteAll("trie/balanceDB")
+	db.deleteAll("trie/configDB")
 
 def init_account():
 	genesisAccount = {"address":'cxa65cfc9af6b7daae5811836e1b49c8d2570c9387', "balance":defaultdict(int), "nonce":0}
 	genesisAccount['balance']['cic'] = 5000000000000000000000000000
-	db.balanceDB.put('cxa65cfc9af6b7daae5811836e1b49c8d2570c9387'.encode(), pickle.dumps(genesisAccount))
+	db.put("trie/balanceDB", 'cxa65cfc9af6b7daae5811836e1b49c8d2570c9387'.encode(), pickle.dumps(genesisAccount))
 	feeAddr = config["feeAddress"]
 	feeAccount = {"address": feeAddr, "balance":defaultdict(int), "nonce":0}
 	feeAccount['balance']['cic'] = 1000
-	db.balanceDB.put(feeAddr.encode(), pickle.dumps(feeAccount))
-	db.balanceDB.put(config["tokenName"].encode(), pickle.dumps(['cic', 'now']))
-	db.createBlock(genesisBlock)
+	db.put("trie/balanceDB", feeAddr.encode(), pickle.dumps(feeAccount))
+	db.put("trie/balanceDB", config["tokenName"].encode(), pickle.dumps(['cic', 'now']))
+	Database.createBlock(genesisBlock)
 
 	CCRNonceKey = config["currNonceCCR"]
 	beginBlockNum = config["currBTCRelayBlock"]
-	db.configDB.put(CCRNonceKey.encode(), pickle.dumps(1))
-	db.configDB.put(beginBlockNum.encode(), pickle.dumps(533402))
+	db.put("trie/configDB", CCRNonceKey.encode(), pickle.dumps(1))
+	db.put("trie/configDB", beginBlockNum.encode(), pickle.dumps(533402))
 #key = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(38))
 
 
@@ -61,7 +64,7 @@ def init_transaction():
 		
 		#print(transaction['txid'])
 		transactions.append(transaction)
-		flag = db.pendingTransaction(transaction)
+		flag = Database.pendingTransaction(transaction)
 		if not flag:
 			print("Something wrong!")
 		"""
@@ -82,7 +85,7 @@ def init_transaction():
 	}
 
 	transaction = Transaction.newTransaction(transaction, feeKey)
-	flag = db.pendingTransaction(transaction)
+	flag = Database.pendingTransaction(transaction)
 	if not flag:
 		print("Something wrong!")
 	"""

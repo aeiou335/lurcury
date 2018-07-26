@@ -3,19 +3,18 @@ from urllib.parse import urlparse
 import cgi
 import json
 import pickle
-import leveldb
 import sys
 sys.path.append('trie')
 import MerklePatriciaTrie as MPT
-import db as db
+import db.DB as db
 sys.path.append('core')
 from database import Database
 from transaction import Transaction
 
 class BlockTrie(object):
 	def __init__(self, root_hash):
-		blockDB = db.DB("trie/blockDB")
-		self.trie = MPT.MerklePatriciaTrie(blockDB, root_hash) 
+		#blockDB = db.DB("trie/blockDB")
+		self.trie = MPT.MerklePatriciaTrie("trie/blockDB", root_hash) 
 	def search(self, key):
 		value = self.trie.search(key)
 		root_hash = self.trie.root_hash()
@@ -23,8 +22,8 @@ class BlockTrie(object):
 
 class TransactionTrie(object):
 	def __init__(self, root_hash):
-		transactionDB = db.DB("trie/transactionDB")
-		self.trie = MPT.MerklePatriciaTrie(transactionDB, root_hash) 
+		#transactionDB = db.DB("trie/transactionDB")
+		self.trie = MPT.MerklePatriciaTrie("trie/transactionDB", transactionDB, root_hash) 
 
 	def search(self, key):
 		value = self.trie.search(key)
@@ -40,7 +39,7 @@ class Handler(BaseHTTPRequestHandler):
 		self.send_header("Access-Control-Allow-Headers", "X-Requested-With, Content-type")
 	 
 	def do_GET(self):
-		rootDB = db.DB("trie/rootDB")
+		#rootDB = db.DB("trie/rootDB")
 		try:
 			method, param = urlparse(self.path).path.split('/')[1:]
 		except:
@@ -49,38 +48,38 @@ class Handler(BaseHTTPRequestHandler):
 
 		if method == "getBlock":
 			try:
-				root = rootDB.get(b"BlockTrie")
+				root = db.get("trie/rootDB", b"BlockTrie")
 			except:
 				root = ""
 			print("root:", root)
 			trie = BlockTrie(root)
 			root, value = trie.search(param)
 			print("value:", value)
-			rootDB.put(b"BlockTrie", root)	
+			db.put("trie/rootDB", b"BlockTrie", root)	
 
 		elif method == "getBlockbyID":
-			idx_db = leveldb.LevelDB("trie/blockDB")
+			#idx_db = db.DB("trie/blockDB")
 			try:
-				value = pickle.loads(idx_db.Get(str(param).encode()))
+				value = pickle.loads(db.Get("trie/blockDB", str(param).encode()))
 			except:
 				value = "No such id."
 			print("value:", value)
 
 		elif method == "getTransaction":
 			try:
-				root = rootDB.get(b"TransactionTrie")
+				root = db.get("trie/rootDB", b"TransactionTrie")
 			except:
 				root = ""
 			print('root:', root)
 			trie = TransactionTrie(root)
 			root, value = trie.search(param)
 			
-			rootDB.put(b"TransactionTrie", root)
+			db.put("trie/rootDB", b"TransactionTrie", root)
 
 		elif method == "getAccount":
-			balanceDB = leveldb.LevelDB("trie/balanceDB")
+			#balanceDB = db.DB("trie/balanceDB")
 			try:
-				value = pickle.loads(balanceDB.Get(param.encode()))
+				value = pickle.loads(db.Get("trie/balanceDB", param.encode()))
 			except:
 				self.send_error(400, "Account doesn't exist!")
 				return 0
@@ -129,8 +128,7 @@ class Handler(BaseHTTPRequestHandler):
 			#print(method)
 			required = {'to','out','nonce','fee','sign','publicKey','txid'}
 			if required <= transaction.keys():
-				database = Database()
-				if database.pendingTransaction(transaction):
+				if Database().pendingTransaction(transaction):
 					#print(transaction)
 					value = True
 				else:

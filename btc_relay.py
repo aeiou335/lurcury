@@ -5,7 +5,7 @@ import pickle
 import sys
 from config import config
 sys.path.append('trie')
-import db as db
+from db import DB as db 
 import MerklePatriciaTrie as MPT
 sys.path.append('core')
 from transaction import Transaction
@@ -14,18 +14,18 @@ from bitcoinRPC import *
 
 class bitcoinInfo: 
 	def pendingBTCRelay(transactions):
-		transactionDB = db.DB("trie/transactionDB")
+		#transactionDB = db.DB("trie/transactionDB")
 		con = config.config()
 		key = con["pendingTransaction"]
 		try:
-			pending = pickle.loads(transactionDB.get(key.encode()))
+			pending = pickle.loads(db.get("trie/transactionDB", key.encode()))
 		except:
 			pending = []
 		for t in transactions:
 			pending.append(t)
 		try:
-			transactionDB.put(key.encode(), pickle.dumps(pending))
-			print("pending:",pickle.loads(transactionDB.get(key.encode())))
+			db.put("trie/transactionDB", key.encode(), pickle.dumps(pending))
+			print("pending:",pickle.loads(db.get("trie/transactionDB", key.encode())))
 			return True
 		except:
 			return False
@@ -65,31 +65,14 @@ class bitcoinInfo:
 			#	address = transaction['scriptPubKey']['asm'][10:]
 		return flag, value, address
 
-	def btcRelay(transaction):
-		balanceDB = db.DB('trie/balanceDB')
-		value = int(transaction['out']['cic'])
-		address = transaction['to']
-		try:
-			account = pickle.loads(balanceDB.get(address.encode()))
-		except:
-			account = {'address':receiver,'balance':defaultdict(float),'nonce':0}
-		
-		account['balance']['btcRelay'] += value
-
-		try:
-			balanceDB.put(address.encode(), pickle.dumps(account))
-			return True
-		except:
-			return False
-
 	def blockTransaction():
 		con = config.config()
-		configDB = db.DB("trie/configDB")
+		#configDB = db.DB("trie/configDB")
 		currBlockkey = con["currBTCRelayBlock"]
 		confirmation = con["CCRConfirmation"]
 		currNonceKey = con["currNonceCCR"]
 		while True:
-			currBlockRead = pickle.loads(configDB.get(currBlockkey.encode()))
+			currBlockRead = pickle.loads(db.get("trie/configDB", currBlockkey.encode()))
 			blockNum = json.loads(bitcoinRPC().blocknumber())["result"]
 			print("blockNum:", blockNum)
 			print("currBlockRead:", currBlockRead)
@@ -97,7 +80,7 @@ class bitcoinInfo:
 				time.sleep(60)
 				continue
 			else:
-				currNonce = pickle.loads(configDB.get(currNonceKey.encode()))
+				currNonce = pickle.loads(db.get("trie/configDB", currNonceKey.encode()))
 				r = bitcoinRPC().blockInfo(currBlockRead)
 				z = json.loads(r) 
 				transactions = []
@@ -123,8 +106,8 @@ class bitcoinInfo:
 				a = bitcoinInfo.pendingBTCRelay(transactions)
 				print(a)
 				currBlockRead += 1
-				configDB.put(currBlockkey.encode(), pickle.dumps(currBlockRead))
-				configDB.put(currNonceKey.encode(), pickle.dumps(currNonce))
+				db.put("trie/configDB", currBlockkey.encode(), pickle.dumps(currBlockRead))
+				db.put("trie/configDB", currNonceKey.encode(), pickle.dumps(currNonce))
 						#res = bitcoinInfo.btcRelay(value, address)
 			#if res:
 			#	trie.update(y['txid'], y)

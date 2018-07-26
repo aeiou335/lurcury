@@ -4,38 +4,50 @@
 # In[1]:
 
 
-import leveldb
-
+#import leveldb
+import plyvel
 
 # In[ ]:
 
 
 class DB:
-    def __init__(self,name):
-        self.db = leveldb.LevelDB(name)
-        
-    def get(self, key):
+    def get(name, key):
         try:
-            value = self.db.Get(key)
-        except KeyError:
-            print('There is no such key!', key)
-        except Exception as e:
-            raise str(e)
+            db = plyvel.DB(name, create_if_missing=True)
+        except:
+            DB.get(name, key)
+        value = db.get(key)
+        db.close()
+        assert db.closed
+        if value == None:
+            value = ""
+        #print("key:",key)
         return value
     
-    def put(self, key, value):
-        self.db.Put(key, value)
-            
-    def delete(self, key):
-        self.db.Delete(key)
-        
-    def isInTree(self, key):
+    def put(name, key, value):
         try:
-            self.db.Get(key)
-            return True
-        except KeyError:
-            return False
-    
-    def deleteAll(self):
-        for key, value in self.db.RangeIter():
-            self.db.Delete(key)
+            db = plyvel.DB(name, create_if_missing=True)
+        except:
+            DB.put(name, key, value)
+        db.put(key, value)
+        db.close()
+        assert db.closed
+            
+    def delete(name, key):
+        try:
+            db = plyvel.DB(name, create_if_missing=True)
+        except:
+            DB.delete(name, key)
+        db.delete(key)
+        db.close()
+        assert db.closed
+
+    def deleteAll(name):
+        try:
+            db = plyvel.DB(name, create_if_missing=True)
+        except:
+            DB.deleteAll(name)
+        for key, value in db:
+            db.delete(key)
+        db.close()
+        assert db.closed
