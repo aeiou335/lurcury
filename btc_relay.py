@@ -96,7 +96,7 @@ class bitcoinInfo:
 							"out": {"btr": str(int(float(value)*10e7))},
 							"nonce":str(currNonce),
 						    "fee":"10",
-						    "type":"btc",
+						    "type":"btcc",
 						    "input":""
 						}
 						transaction = Transaction.newTransaction(transaction, key)

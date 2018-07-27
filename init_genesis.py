@@ -51,6 +51,8 @@ def init_transaction():
 	key = '97ddae0f3a25b92268175400149d65d6887b9cefaf28ea2c078e05cdc15a3c0a'
 	t = time.time()
 	for i in range(9):
+		if i % 100 == 0:
+			print(time.time()-t)
 		transactions = []
 		transaction = {}
 		transaction['fee'] = '10'
@@ -73,6 +75,7 @@ def init_transaction():
 		r = requests.post('http://127.0.0.1:9000', headers = headers, data = json.dumps(data))
 		#print(r.text)
 		"""
+	
 	#newKey = '975c778b9d3cb2f40539dea7a5b75ee6973f72bf46ec83130b0255cb467879aa'
 	feeKey = '4f269e92bde3b00f9b963d665630445b297e2e8d29987b1d50d1e8785372e393'
 	transaction = {
@@ -80,7 +83,7 @@ def init_transaction():
 		'to': feeAddr,
 		'out': {'cic':'100'},
 		'nonce': '1',
-		'type': 'btc',
+		'type': 'btcc',
 		'input': '90f4btr2100000000000000'
 	}
 
@@ -93,9 +96,9 @@ def init_transaction():
 	headers = {'Content-Type':'application/json'}
 	r = requests.post('http://127.0.0.1:9000', headers = headers, data = json.dumps(data))
 	#print(r.text)
-	"""
+	
 	print((time.time()-t))
-
+	"""
 def main():
 	clearAllDB()
 	init_account()

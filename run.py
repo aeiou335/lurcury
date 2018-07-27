@@ -21,26 +21,34 @@ class lurcury:
 				#time.sleep(2)
 				newBlock = Block.block()
 				transactions = []
-				for i in range(5):
+				#while True:
+				t = time.time()
+				for i in range(1000):
 					pendingTran = Database.getPendingTransaction()
-					print(pendingTran)
+					print("getPendingTranTime:", time.time()-t)
+					t = time.time()
 					if pendingTran == {}:
 						print('There is no pending transaction now.')
 						continue
 					else:
 						if not Transaction.verifyTransaction(pendingTran):
 							continue
+						print("verifyTranTime:", time.time()-t)
+						t = time.time()
 						#balance verify and nonce
 						if not Database.verifyBalanceAndNonce(pendingTran):
 							print("verify balance and nonce error")
 							continue
-						
+						print("verifyBalnceTime:", time.time()-t)
+						t = time.time()
 						if not Database.updateBalanceAndNonce(pendingTran):
 							print("update error")
 							continue
-					
+						print("updateBalanceTime:", time.time()-t)
+						t = time.time()
 					newBlock = Block.pushTransactionToArray(newBlock, pendingTran)
 					transactions.append(pendingTran)
+				print("time:", time.time()-t)
 				#print("newBlock:", newBlock)
 				parentBlock = Database.getBlockByID(currentBlockNum-1)
 				key = '97ddae0f3a25b92268175400149d65d6887b9cefaf28ea2c078e05cdc15a3c0a'

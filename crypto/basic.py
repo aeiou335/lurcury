@@ -37,7 +37,7 @@ class Key_c:
     def bitcoinkey(wifkey):
         unit = identity()
         unit.init_priv(wif=wifkey)
-        pb = unit.get_pubkey()
+        #pb = unit.get_pubkey()
         return unit.get_privkey()
     def privateKey():
         priv = SigningKey.generate(curve=SECP256k1)
@@ -66,8 +66,12 @@ class Key_c:
         k.update(bytes().fromhex(key))
         return "0x"+k.hexdigest()[24:64]
     def bitcoinaddress(key):
-        return idendity(priv=key).get_addr()
-        #return 
+        unit = identity()
+        return unit.pub2addr(key)
+        #return
+    def bitcoinaddress_compress(key):
+        unit = identity()
+        return unit.pub2addr_compress(key) 
     def exp():
         f = Key_c.privateKey()
         f2 = Key_c.publicKey(f)
@@ -100,7 +104,7 @@ t = Key_c.bitcoinaddress(Key_c.publicKey(h))
 print(t)
 print(Key_c.publicKey("97ddae0f3a25b92268175400149d65d6887b9cefaf28ea2c078e05cdc15a3c0a"))
 print(Key_c.address("7b83ad6afb1209f3c82ebeb08c0c5fa9bf6724548506f2fb4f991e2287a77090177316ca82b0bdf70cd9dee145c3002c0da1d92626449875972a27807b73b42e"))
-print("ethadd:",Key_c.ethereumaddress(Key_c.publicKey(h)))
+#print("ethadd:",Key_c.ethereumaddress(Key_c.publicKey(h)))
 
 #r = signature_c.sign("123",Key_c.bitcoinkey("5KUEwxHXTyWPoE6SLeomvqUQmN6o63Hzu7YFC9K6A4NKXh75QCr"))
 """

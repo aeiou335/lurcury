@@ -64,6 +64,9 @@ class Database():
 			if transaction['type'] == "btc":
 				print("btc")
 				address = Key_c.bitcoinaddress(transaction["publicKey"])
+			elif transaction['type'] == "btcc":
+                                print("btcc")
+                                address = Key_c.bitcoinaddress_compress(transaction["publicKey"])
 			elif transaction['type'] == "eth":
 				print("eth")
 				address = Key_c.ethereumaddress(transaction["publicKey"])
@@ -81,22 +84,22 @@ class Database():
 		except:
 			print('accounterror')
 			return False
-		#try:
-		for coin in transaction['out']:
-			if accountData['balance'][coin] < int(transaction['out'][coin]):
-				print('coinerror')
+		try:
+			for coin in transaction['out']:
+				if accountData['balance'][coin] < int(transaction['out'][coin]):
+					print('coinerror')
+					return False
+			if 'cic' in transaction['out']:
+				cic = int(transaction['out']['cic'])
+			else:
+				cic = 0
+			if accountData['balance']['cic'] < cic + int(transaction['fee']):
+				print('feeerror')
 				return False
-		if 'cic' in transaction['out']:
-			cic = int(transaction['out']['cic'])
-		else:
-			cic = 0
-		if accountData['balance']['cic'] < cic + int(transaction['fee']):
-			print('feeerror')
-			return False
 				
-		#except:
-		#	print('idk')
-		#	return False
+		except:
+			print('idk')
+			return False
 		print(accountData['nonce'], int(transaction['nonce']))
 		if accountData['nonce']+1 != int(transaction['nonce']):
 			return False

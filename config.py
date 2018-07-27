@@ -4,7 +4,7 @@ class config:
         config = {
             "fee":"5",
             "tokenPublishfee":"10000",
-            "feeAddress":"1Ky8cTXAPUqMpNSjMqosoNAayzWUscuuFU",
+            "feeAddress":"1NUik3tsajkDU8N3xhpBfMkKnS9cPJRDHH",
             "receiveAddress":"16yvczqzg526o7q52r9td4sryggmjtpud7",
             "feeToken":"cic",
             "blockSpeed":"2",
@@ -13,6 +13,11 @@ class config:
             "tokenName": "BF524FAA5386EF6B5DEB65464ADF4C03620ABB9AC42B80FC5642F39F9A95F1DC",
             "currBTCRelayBlock": "404F7CBB5283C913D6000F1D11B4F9EDD0801682E122B4D5D103281C92B2B5DA",
             "CCRConfirmation": 0,
-            "currNonceCCR": "34F287CBEA7D09EFB1F7B2D8C2458BAE49D070E98146BA53E352A9DF6D79855F"
+            "currNonceCCR": "34F287CBEA7D09EFB1F7B2D8C2458BAE49D070E98146BA53E352A9DF6D79855F",
+           "blockDB":"trie/blockDB",
+            "transactionDB":"trie/transactionDB",
+            "rootDB":"trie/rootDB",
+            "balanceDB":"trie/balanceDB"
+            
         }
         return config

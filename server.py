@@ -10,6 +10,7 @@ from db import DB as db
 sys.path.append('core')
 from database import Database
 from transaction import Transaction
+from config import *
 
 class BlockTrie(object):
 	def __init__(self, root_hash):
