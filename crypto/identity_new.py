@@ -1,4 +1,39 @@
 ## Conversion from key to address ##
+'''
+    Functions:
+        - priv2addr (cls, priv=None, wif=None, main=True)
+        - priv2addr_compress (cls, priv=None, wif=None, main=True)
+        - priv2pub (cls, priv=None, wif=None)
+        - priv2pub_compress (cls, priv=None, wif=None)
+        - pub2addr (cls, key, main=True)
+        - pub2addr_compress (cls, key, main=True)
+        - priv2signkey (cls, priv=None, wif=None)
+        - priv2verkey (cls, priv=None, wif=None)
+        - compress_pub (cls, key)
+        - priv2wif (cls, key)
+        - priv2wif_compressed (cls, key)
+        - wif2priv (cls, wif)
+        - signdata (cls, priv=None, wif=None, signkey=None, data=None)
+        - verifydata (cls, priv=None, wif=None, verkey=None, sigdata=None, origdata=None)
+
+    Usage notes:
+        1. For signdata(), the input can be privkey/wif/signkey, 
+        where privkey and wif are strings and signkey is ecdsa.SigningKey(which 
+        can be obtained by calling identity.priv2signkey()).
+        
+        2. Similarly, for verifydata(), the input verkey must be of type
+        ecdsa.VerifyingKey(which can be obrained by identity.pric2verkey()).
+        The signed data created by signdata() should be directly fed into verifydata()
+        without any conversions.
+        
+        3. All other functions accept input as strings and output strings
+        
+        4. The pubkey inputs to pub2addr() and pub2addr_compress() should be uncompressed
+        with b"04" in front of it.
+        
+        5. There is a parameter main in pub2addr() and pub2addr_compress()
+        which indicates where the address corresponds to the mainnet. It defaults to true.
+'''
 import os
 import hashlib
 import base58
@@ -12,7 +47,7 @@ class identity():
     """
     
     @classmethod
-    def priv2addr(cls, priv=None, wif=None):
+    def priv2addr(cls, priv=None, wif=None, main=True):
         pk = b(priv) if isinstance(priv,str) else priv
         wiff = b(wif) if isinstance(wif,str) else wif
         if pk == None:
@@ -22,11 +57,11 @@ class identity():
             privkey = binascii.unhexlify(pk)
         verkey = cls._priv2verkey(privkey)
         pubkey = b"04" + binascii.hexlify(verkey.to_string())
-        addr = cls._pub2addr(pubkey)
+        addr = cls._pub2addr(pubkey,main)
         return str(addr, 'ascii')
 
     @classmethod
-    def priv2addr_compress(cls, priv=None, wif=None):
+    def priv2addr_compress(cls, priv=None, wif=None, main=True):
         pk = b(priv) if isinstance(priv,str) else priv
         wiff = b(wif) if isinstance(wif,str) else wif
         if pk == None:
@@ -37,7 +72,7 @@ class identity():
         verkey = cls._priv2verkey(privkey)
         pubkey = binascii.hexlify(verkey.to_string())
         pbc = cls._compress_pub(pubkey)
-        addr = cls._pub2addr(pbc)
+        addr = cls._pub2addr(pbc,main)
         return str(addr, 'ascii')
 
     @classmethod
@@ -98,7 +133,8 @@ class identity():
         else:
             privkey = binascii.unhexlify(pk)
         p = cls._priv2signkey(privkey)
-        return str(binascii.hexlify(p.to_string()), 'ascii')
+        #return str(binascii.hexlify(p.to_string()), 'ascii')
+        return p.to_string()
 
     @classmethod
     def priv2verkey(cls, priv=None, wif=None):
@@ -110,8 +146,8 @@ class identity():
         else:
             privkey = binascii.unhexlify(pk)
         v = cls._priv2verkey(privkey)
-        return str(binascii.hexlify(v.to_string()), 'ascii')
-        #return v.to_string()
+        #return str(binascii.hexlify(v.to_string()), 'ascii')
+        return v.to_string()
 
     @classmethod
     def compress_pub(cls, key):
@@ -142,67 +178,58 @@ class identity():
         return str(binascii.hexlify(p), 'ascii')
     
     @classmethod
-    def signdata(cls, priv=None, wif=None, data=None):
+    def signdata(cls, priv=None, wif=None, signkey=None, data=None):
         assert data is not None, "no data given!"
         data = b(data) if isinstance(data, str) else data
-        '''
+        
         if signkey is not None:
-            signkey = binascii.unhexlify(signkey)
-            skey = ecdsa.SigningKey.from_string(signkey,curve=ecdsa.SECP256k1) if isinstance(signkey,str) else signkey
+            #signkey = binascii.unhexlify(signkey)
+            skey = ecdsa.SigningKey.from_string(signkey,curve=ecdsa.SECP256k1) #if isinstance(signkey,str) else signkey
         else:
-        '''
-        pk = b(priv) if isinstance(priv,str) else priv
-        wiff = b(wif) if isinstance(wif,str) else wif
-        if pk == None:
-            assert wiff is not None, "no keys given!"
-            privkey = cls._wif2priv(wiff)
-        else:
-            privkey = binascii.unhexlify(pk)
-        skey = cls._priv2signkey(privkey)
+        
+            pk = b(priv) if isinstance(priv,str) else priv
+            wiff = b(wif) if isinstance(wif,str) else wif
+            if pk == None:
+                assert wiff is not None, "no keys given!"
+                privkey = cls._wif2priv(wiff)
+            else:
+                privkey = binascii.unhexlify(pk)
+            skey = cls._priv2signkey(privkey)
         
         return binascii.hexlify(skey.sign(data))
             
     @classmethod
-    def verifydata(cls, priv=None, wif=None, sigdata=None, origdata=None):
+    def verifydata(cls, priv=None, wif=None, verkey=None, sigdata=None, origdata=None):
         assert sigdata is not None, "no signed data given!"
         assert origdata is not None, "no original data given!"
-        '''
+        
         if verkey is not None:
-            verkey = binascii.unhexlify(verkey)
-            vkey = ecdsa.VerifyingKey.from_string(verkey,curve=ecdsa.SECP256k1) if isinstance(verkey,str) else verkey
-            print(vkey)
+            #verkey = binascii.hexlify(b(verkey))
+            vkey = ecdsa.VerifyingKey.from_string(verkey,curve=ecdsa.SECP256k1) #if isinstance(verkey,str) else verkey
+            assert isinstance(vkey, ecdsa.VerifyingKey)
         else:
-        '''
-        pk = b(priv) if isinstance(priv,str) else priv
-        wiff = b(wif) if isinstance(wif,str) else wif
-        if pk == None:
-            assert wiff is not None, "no keys given!"
-            privkey = cls._wif2priv(wiff)
-        else:
-            privkey = binascii.unhexlify(pk)
-        vkey = cls._priv2verkey(privkey)
+            '''
+            if pubkey is not None:
+                verkey = binascii.unhexlify(pubkey[2:])
+                vkey = ecdsa.VerifyingKey.from_string(verkey,curve=ecdsa.SECP256k1) if isinstance(verkey,str) else verkey
+                assert isinstance(verkey,ecdsa.VerifyingKey)
+            else:
+            '''
+            pk = b(priv) if isinstance(priv,str) else priv
+            wiff = b(wif) if isinstance(wif,str) else wif
+            if pk == None:
+                assert wiff is not None, "no keys given!"
+                privkey = cls._wif2priv(wiff)
+            else:
+                privkey = binascii.unhexlify(pk)
+            vkey = cls._priv2verkey(privkey)
         sigdata = binascii.unhexlify(sigdata)
         origdata = b(origdata)
         return vkey.verify(sigdata, origdata)
 
 
 ################## PRIVATE FUNCTIONS ###########################
-    '''
-    def _priv2addr(self, priv=None, wif=None, compress=True):
-        pb = self._priv2pub(priv,wif,compress)
-        addr = self._pub2addr(pb)
-        return addr
-
-    def _priv2pub(self, priv=None, wif=None, compress=True):
-        if priv == None:
-            assert wif is not None, "no keys given!"
-            privkey = self._wif2priv(wif)
-        else:
-            privkey = priv
-        verkey = self._priv2verkey(privkey)
-        pubkey = b"04" + binascii.hexlify(verkey.to_string())
-        return pubkey
-    '''
+    
     @staticmethod
     def _pub2addr(key, main=True):
         def enc(key, ad):
@@ -265,7 +292,7 @@ class identity():
 
     @staticmethod
     def _wif2priv(wif):
-        print(str(wif, 'ascii')[0])
+        #print(str(wif, 'ascii')[0])
         ad = base58.b58decode_check(wif)
         #print(str(binascii.hexlify(ad), 'ascii'))
         if str(wif,'ascii')[0]=='K' or str(wif,'ascii')[0]=='L':
@@ -356,8 +383,10 @@ v = identity.priv2verkey(priv=priv)
 signed = identity.signdata(data=data, priv=priv)
 print("testing signdata with priv:", identity.signdata(data=data, priv=priv))
 print("testing verifydata with priv:", identity.verifydata(sigdata=signed, origdata=data, priv=priv))
-#print("testing verifydata with priv:", identity.verifydata(sigdata=signed, origdata=data, verkey=v))
+print("testing verifydata with priv:", identity.verifydata(sigdata=signed, origdata=data, verkey=v))
 signed = identity.signdata(data=data, wif=w)
 print("testing signdata with w:", identity.signdata(data=data, wif=w))
 print("testing verifydata with w:", identity.verifydata(sigdata=signed, origdata=data, wif=w))
-#print("testing verifydata with priv:", identity.verifydata(sigdata=signed, origdata=data, verkey=v))
+print("testing verifydata with priv:", identity.verifydata(sigdata=signed, origdata=data, verkey=v))
+signed = identity.signdata(data=data, signkey=s)
+print("testing verifydata with verkey:", identity.verifydata(sigdata=signed, origdata=data, verkey=v))
