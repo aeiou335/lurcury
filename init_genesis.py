@@ -57,7 +57,7 @@ def init_transaction(db):
 	feeAddr = config["feeAddress"]
 	key = '97ddae0f3a25b92268175400149d65d6887b9cefaf28ea2c078e05cdc15a3c0a'
 	t = time.time()
-	for i in range(9):
+	for i in range(999):
 		
 		print(time.time()-t)
 		transactions = []
@@ -75,7 +75,9 @@ def init_transaction(db):
 		transactions.append(transaction)
 		flag = Database.pendingTransaction(transaction, db)
 		if not flag:
-			print("Something wrong!")
+			print("Pending Something wrong!")
+		#print("-----------------------------------------")
+		#print("pt:",db["pt"])
 		"""
 		data = {'method':'sendTransaction', 'param':[transaction]}
 		headers = {'Content-Type':'application/json'}

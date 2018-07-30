@@ -29,9 +29,10 @@ class Database():
 		try:
 			db["balanceDB"].put(feeAddress.encode(), pickle.dumps(feeAccount))
 		except:
-			return False 
+			return False
 		if int(newTransaction['fee']) >= int(requireFee): 
 			db["pt"].append(newTransaction)
+			return True
 		#if Database.verifyBalanceAndNonce(newTransaction, db):
 		#	db["pt"].append(newTransaction)
 	
@@ -60,8 +61,8 @@ class Database():
 				print("btc")
 				address = Key_c.bitcoinaddress(transaction["publicKey"])
 			elif transaction['type'] == "btcc":
-                                print("btcc")
-                                address = Key_c.bitcoinaddress_compress(transaction["publicKey"])
+								print("btcc")
+								address = Key_c.bitcoinaddress_compress(transaction["publicKey"])
 			elif transaction['type'] == "eth":
 				print("eth")
 				address = Key_c.ethereumaddress(transaction["publicKey"])
@@ -96,20 +97,21 @@ class Database():
 			print('idk')
 			return False
 		if len(transaction['input']) > 7 and transaction["input"][:4] == "90f4":
-                        name = transaction['input'][4:7]
-                        con = config.config()
-                        feeAddress = con["feeAddress"]
-                        try:
-                                amount = int(transaction["input"][7:])
-                        except:
-                                return False
-                        requiredFee = 10
-                        if int(transaction['out']['cic']) < requiredFee:
-                                return False
-                        if transaction['to'] != feeAddress:
-                                return False
-                        if name in currName:
-                                return False
+			con = config.config()
+			currName = pickle.loads(db["balanceDB"].get(con["tokenName"].encode()))
+			name = transaction['input'][4:7]
+			feeAddress = con["feeAddress"]
+			try:
+					amount = int(transaction["input"][7:])
+			except:
+					return False
+			requiredFee = 10
+			if int(transaction['out']['cic']) < requiredFee:
+					return False
+			if transaction['to'] != feeAddress:
+					return False
+			if name in currName:
+					return False
 		print(accountData['nonce'], int(transaction['nonce']))
 		if accountData['nonce']+1 != int(transaction['nonce']):
 			return False
@@ -120,17 +122,8 @@ class Database():
 		#Update the balance after if the transaction has been verified
 		#balanceDB = db.DB("trie/balanceDB")
 		con = config.config()
-		feeAddress = con["feeAddress"]
-		"""
+		feeAddress = con["feeAddress"]		
 		fee = transaction['fee']
-		feeAccount = pickle.loads(db["balanceDB"].get(feeAddress.encode()))
-		feeAccount['balance']['cic'] += int(fee)
-		print("feeAccount:", feeAccount)
-		try:
-			db["balanceDB"].put(feeAddress.encode(), pickle.dumps(feeAccount))
-		except:
-			return False
-		"""
 		try:
 			if transaction['type'] == "btc":
 				sender = Key_c.bitcoinaddress(transaction["publicKey"])

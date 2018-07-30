@@ -15,22 +15,22 @@ class lurcury:
 			genesisBlock = Genesis.genesis()
 			Database.createBlock(genesisBlock, conn)
 		else:
-			while True:
-			#for j in range(3):
+			#while True:
+			for j in range(1):
 				#time.sleep(2)
 				newBlock = Block.block()
 				transactions = []
 				#while True:
 				t = time.time()
 				for i in range(1000):
-					#pendingTran = Database.getPendingTransaction(conn)
-					pendingTran = conn["pt"].pop(0)
+					#pendingTran = Database.getPendingTransaction(conn) 
 					print("getPendingTranTime:", time.time()-t)
 					t = time.time()
-					if pendingTran == []:
+					if conn["pt"] == []:
 						print('There is no pending transaction now.')
 						continue
 					else:
+						pendingTran = conn["pt"].pop(0)
 						if not Transaction.verifyTransaction(pendingTran):
 							continue
 						print("verifyTranTime:", time.time()-t)
@@ -39,7 +39,7 @@ class lurcury:
 						if not Database.verifyBalanceAndNonce(pendingTran, conn):
 							print("verify balance and nonce error")
 							continue
-						rint("verifyBalnceTime:", time.time()-t)
+						print("verifyBalnceTime:", time.time()-t)
 						t = time.time()
 						if not Database.updateBalanceAndNonce(pendingTran, conn):
 							print("update error")
@@ -48,20 +48,21 @@ class lurcury:
 						t = time.time()
 					newBlock = Block.pushTransactionToArray(newBlock, pendingTran)
 					transactions.append(pendingTran)
-				print("time:", time.time()-t)
+				t = time.time()
 				#print("newBlock:", newBlock)
 				parentBlock = Database.getBlockByID(currentBlockNum-1, conn)
 				key = '97ddae0f3a25b92268175400149d65d6887b9cefaf28ea2c078e05cdc15a3c0a'
 				#print('parent', parentBlock)
 				newBlock = Block.newBlock_POA(newBlock, parentBlock, key)
+				print("newBlock_POATime:", time.time()-t)
+				t = time.time()
 				try:
 					Database.createBlock(newBlock, conn)
 				except:
 					print('Error occurs when saving block into db.')
 					continue
-				#fntdb.updateDBAccountStatus(newBlock)
-				
-				#transactions = newBlock['transaction']
+				print("createBlockTime:", time.time()-t)
+				t = time.time()
 				if len(transactions) == 0:
 					continue
 				for transaction in transactions:
@@ -70,7 +71,7 @@ class lurcury:
 					except:
 						print("Error occurs when saving transaction into db.")
 						continue
-
+				print("createTranTime:", time.time()-t)
 #lurcury.main()	
 #getBlockNumber
 #if(blockNumber == null):

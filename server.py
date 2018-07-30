@@ -31,9 +31,9 @@ class TransactionTrie(object):
 		root_hash = self.trie.root_hash()
 		return root_hash, value
 def handlerwithdb(db):	
-	print("db",db)
+	#print("db",db)
 	class Handler(BaseHTTPRequestHandler):
-		print("db",db)
+		#print("db",db)
 		#def __init__(self, *args, **kargs):
 		#	super(Handler, self).__init__(*args, **kargs)
 			
@@ -168,7 +168,7 @@ class Server_run():
     def run(db):
         from http.server import HTTPServer
         handler = handlerwithdb(db)
-        server = HTTPServer(("192.168.51.201", 9000), handler)
+        server = HTTPServer(("192.168.0.178", 9000), handler)
         print("Starting server, use <Ctrl-C> to stop")
         server.serve_forever()  
 #Server_run.run()
