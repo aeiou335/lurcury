@@ -52,6 +52,7 @@ from fastecdsa import point as fpoint
 from fastecdsa import ecdsa as fecdsa
 from fastecdsa import curve as fcurve
 
+
 class identity():
     """ 
     Class with keys and encoded address. 
@@ -200,8 +201,24 @@ class identity():
         else:
             privkey = binascii.unhexlify(pk)
         s = cls.priv2pemlong(privkey)
+        '''
+        def num2str(num):
+            order = 'FFFFFFFF FFFFFFFF FFFFFFFF FFFFFFFE BAAEDCE6 AF48A03B BFD25E8C D0364141'
+            l = (1+len("%x" % order))//2
+            fmt_str = "%0" + str(2 * l) + "x"
+            string = binascii.unhexlify((fmt_str % num).encode())
+            assert len(string) == l, (len(string), l)
+            return string
+        '''
+        order = 'FFFFFFFF FFFFFFFF FFFFFFFF FFFFFFFE BAAEDCE6 AF48A03B BFD25E8C D0364141'
         (r, s) = fecdsa.sign(data, s, fcurve.secp256k1)
-        return str(r) + str(s)
+        print("r after signing: %i" %r)
+        print("s after signing: %i" %s)
+        #return str(r) + str(s)
+        #return num2str(r)+num2str(s)
+        #return fecdsa.sign(data, s, fcurve.secp256k1)
+        signed = ecdsa.util.sigencode_der(r,s,order)
+        return str(binascii.hexlify(signed), 'ascii')
 
             
     @classmethod
@@ -213,10 +230,24 @@ class identity():
         assert origdata is not None, "no original data given!"
         if pub is not None:
             verkey = cls.pub2vkey(pub)
-        l = len(sigdata)
+        '''
+        l = len(sigdata)+1 if len(sigdata)%2 else len(sigdata)
+        print("length of signature: %i" %len(sigdata))
         sigdata1 = int(sigdata[:int(l/2)])
         sigdata2 = int(sigdata[int(l/2):])
-        return fecdsa.verify((sigdata1,sigdata2), origdata, verkey, fcurve.secp256k1)
+        if sigdata1 > int('FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141',16):
+            sigdata1 = int(sigdata[:int(l/2)-1])
+            sigdata2 = int(sigdata[int(l/2)-1:])
+        '''
+        sigdata = binascii.unhexlify(sigdata)
+        order = 'FFFFFFFF FFFFFFFF FFFFFFFF FFFFFFFE BAAEDCE6 AF48A03B BFD25E8C D0364141'
+        r,s = ecdsa.util.sigdecode_der(sigdata, order)
+        print("r: %i " % r)#(sigdata1))
+        print("s: %i " % s)#(sigdata2))
+        return fecdsa.verify((r,s), origdata, verkey, fcurve.secp256k1) #(sigdata1,sigdata2)
+        #r,s = sigdata
+        #print("r: %i " % (r))
+        #print("s: %i " % (s))
         #return fecdsa.verify(sigdata, origdata, verkey, fcurve.secp256k1)
 
 
@@ -319,7 +350,7 @@ priv = '164C0EA5314F63D2BF5FD7DCD387E66ABD0B0DB360032A9E2232E71E51F8565A'
 wif1 = '5JdFN2jJvC9bCuN4F9i93RkDqBDBqcyinpzBRmnW8xXiXsnGmHT'
 wif2 = 'L1uyy5qTuGrVXrmrsvHWHgVzW9kKdrp27wBC7Vs6nZDTF2BRUVwy'
 pub = identity.priv2pub(priv=priv)
-
+'''
 # test priv2wif
 w = identity.priv2wif(priv)
 print("testing priv2wif:", w)
@@ -367,9 +398,9 @@ print("testing pub2addr without 0x04:", identity.pub2addr(pub[2:]))
 # test pub2addr_compressed
 print("testing pub2addr_compress with 0x04:", identity.pub2addr_compress(pub))
 print("testing pub2addr_compress without 0x04:", identity.pub2addr_compress(pub[2:]))
+'''
 
-
-data = "I want to go to disneyland."
+data = "I want to go to disneyland. Does it matter what I put into this string? Hmm apparently not. But verification time getslonger and longer and longer and longer."
 w = identity.priv2wif(priv)
 p = identity.wif2priv(w)
 print("original priv:",priv)
@@ -385,6 +416,7 @@ print("priv2pub, time elapsed: %f" %(end_time-start_time))
 start_time = time.time()
 signed1 = identity.signdata(data=data, wif=w)
 end_time = time.time()
+print("signed data: %s" %signed1)
 print("Sign, time elapsed: %f" %(end_time-start_time))
 
 start_time = time.time()
