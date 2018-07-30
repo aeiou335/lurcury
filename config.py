@@ -14,10 +14,10 @@ class config:
             "currBTCRelayBlock": "404F7CBB5283C913D6000F1D11B4F9EDD0801682E122B4D5D103281C92B2B5DA",
             "CCRConfirmation": 0,
             "currNonceCCR": "34F287CBEA7D09EFB1F7B2D8C2458BAE49D070E98146BA53E352A9DF6D79855F",
-           "blockDB":"trie/blockDB",
+            "blockDB":"trie/blockDB",
             "transactionDB":"trie/transactionDB",
             "rootDB":"trie/rootDB",
-            "balanceDB":"trie/balanceDB"
-            
+            "balanceDB":"trie/balanceDB",
+            "configDB":"trie/configDB"            
         }
         return config

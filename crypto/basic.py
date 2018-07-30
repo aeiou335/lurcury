@@ -12,6 +12,8 @@ sys.path.append("crypto")
 from identity import identity
 sys.path.append("../")
 from ecdsa import SigningKey, VerifyingKey, NIST256p, SECP256k1
+import time
+
 class Hash_c:
     def sha256_string(data):
         data = bytes(data,"utf8")
@@ -86,8 +88,11 @@ class signature_c:
         sig = priv.sign(data)
         return binascii.hexlify(sig).decode()
     def verify(signData,rawData,pub):
+        print("init",time.time())
         signData = binascii.unhexlify(signData)
+        print("very",time.time())
         pub = VerifyingKey.from_string(bytes().fromhex(pub),curve=SECP256k1)
+        print("end",time.time())
         return pub.verify(signData, rawData)
     def exp():
         x = signature.sign("blahblah","24ac4b12bbb37e5b1e59830c7e376f1963b9cacb4233fa53")

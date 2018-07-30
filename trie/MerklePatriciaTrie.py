@@ -4,7 +4,7 @@ import sys
 sys.path.append('trie')
 #print(sys.path)
 import encoding 
-from db import DB as db 
+#from db import DB as db 
 
 import pickle
 from hashlib import sha256
@@ -18,15 +18,15 @@ class MerklePatriciaTrie:
         self.initial_root_hash(_root_hash)
         
     def initial_root_hash(self,root):
-        if root == "":
+        if root == None:
             return ""
         print('root:', root)
-        node = db.get(self.db, root)
+        node = self.db.get(root)
         self.root = pickle.loads(node)
 
     def getCurrentNum(self):
         try:
-            idx = int(db.get(self.db, b'currentNum').decode())
+            idx = int(self.db.get(b'currentNum').decode())
             #print('s', idx)
             return idx
         except:
@@ -60,19 +60,19 @@ class MerklePatriciaTrie:
         assert isinstance(node, list)
         value = pickle.dumps(node)
         key = sha256(value).digest()
-        db.put(self.db, key, value)
+        self.db.put(key, value)
         return key
 
     def decode(self, key):
         if key == "":
             return ""
-        return pickle.loads(db.get(self.db, key))
+        return pickle.loads(self.db.get(key))
 
     def delete_db(self,node):
         if node == "":
             return 
         key = sha256(pickle.dumps(node)).digest()
-        db.delete(self.db, key)
+        self.db.delete(key)
 
 
     def update_node(self, node, key, value):
@@ -254,15 +254,15 @@ class MerklePatriciaTrie:
         #print("Current root:", self.root)
         self.root = self.update_and_delete(self.root, encoding.raw_to_hex(str(key)), value)
         #print(type(str(self.id).encode()))
-        db.put(self.db, str(self.id).encode(), pickle.dumps(value))
+        self.db.put(str(self.id).encode(), pickle.dumps(value))
         self.id += 1
-        db.put(self.db, b'currentNum', str(self.id).encode())
+        self.db.put(b'currentNum', str(self.id).encode())
         #print("Root after update:", self.root)
         
     def delete(self, key):
         self.root = self.delete_and_delete(self.root, encoding.raw_to_hex(str(key)))
         self.id -= 1
-        db.put(self.db, b'currentNum', str(self.id).encode())
+        self.db.put(b'currentNum', str(self.id).encode())
         #print("Root after delete:", self.root)
         self.root_hash()
 
@@ -287,7 +287,7 @@ class MerklePatriciaTrie:
         self.delete_db(self.root)
         self.root = ""
         self.id = 0
-        db.put(self.db, b'currentNum', str(self.id).encode())
+        self.db.put(b'currentNum', str(self.id).encode())
 
     def _count_key_num(self, node):
         _node_type = self.node_type(node)

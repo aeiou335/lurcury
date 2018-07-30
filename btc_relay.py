@@ -13,19 +13,19 @@ from bitcoinRPC import *
 
 
 class bitcoinInfo: 
-	def pendingBTCRelay(transactions):
+	def pendingBTCRelay(transactions, db):
 		#transactionDB = db.DB("trie/transactionDB")
 		con = config.config()
 		key = con["pendingTransaction"]
 		try:
-			pending = pickle.loads(db.get("trie/transactionDB", key.encode()))
+			pending = pickle.loads(db["transactionDB"].get(key.encode()))
 		except:
 			pending = []
 		for t in transactions:
 			pending.append(t)
 		try:
-			db.put("trie/transactionDB", key.encode(), pickle.dumps(pending))
-			print("pending:",pickle.loads(db.get("trie/transactionDB", key.encode())))
+			db["transactionDB"].put(key.encode(), pickle.dumps(pending))
+			print("pending:",pickle.loads(db.get(key.encode())))
 			return True
 		except:
 			return False
@@ -72,7 +72,7 @@ class bitcoinInfo:
 		confirmation = con["CCRConfirmation"]
 		currNonceKey = con["currNonceCCR"]
 		while True:
-			currBlockRead = pickle.loads(db.get("trie/configDB", currBlockkey.encode()))
+			currBlockRead = pickle.loads(db["configDB"].get(currBlockkey.encode()))
 			blockNum = json.loads(bitcoinRPC().blocknumber())["result"]
 			print("blockNum:", blockNum)
 			print("currBlockRead:", currBlockRead)
@@ -80,7 +80,7 @@ class bitcoinInfo:
 				time.sleep(60)
 				continue
 			else:
-				currNonce = pickle.loads(db.get("trie/configDB", currNonceKey.encode()))
+				currNonce = pickle.loads(db["configDB"].get(currNonceKey.encode()))
 				r = bitcoinRPC().blockInfo(currBlockRead)
 				z = json.loads(r) 
 				transactions = []
@@ -106,8 +106,8 @@ class bitcoinInfo:
 				a = bitcoinInfo.pendingBTCRelay(transactions)
 				print(a)
 				currBlockRead += 1
-				db.put("trie/configDB", currBlockkey.encode(), pickle.dumps(currBlockRead))
-				db.put("trie/configDB", currNonceKey.encode(), pickle.dumps(currNonce))
+				db["configDB"].put(currBlockkey.encode(), pickle.dumps(currBlockRead))
+				db["configDB"].put(currNonceKey.encode(), pickle.dumps(currNonce))
 						#res = bitcoinInfo.btcRelay(value, address)
 			#if res:
 			#	trie.update(y['txid'], y)

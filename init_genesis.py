@@ -3,6 +3,7 @@ from core.transaction import Transaction
 from core.block import Block
 from core.genesis import Genesis
 from config import config
+import plyvel
 import json
 import time
 import pickle
@@ -19,34 +20,40 @@ firstTransaction = genesisBlock['transaction'][0]
 config = config.config()
 #balanceDB = db.DB("trie/balanceDB")
 #configDB = db.DB("trie/configDB")
+def deleteAll(db):
+        for key, value in db:
+            db.delete(key)
 
-def clearAllDB():
-	db.deleteAll("trie/blockDB")
-	db.deleteAll("trie/transactionDB")
-	db.deleteAll("trie/rootDB")
-	db.deleteAll("trie/balanceDB")
-	db.deleteAll("trie/configDB")
-
-def init_account():
+def clearAllDB(db):
+	for key in db:
+		deleteAll(db[key])
+	"""
+	db["blockDB"].deleteAll()
+	db["transacionDB"].deleteAll()
+	db["rootDB"].deleteAll()
+	db["balanceDB"].deleteAll()
+	db["configDB"].deleteAll()
+	"""
+def init_account(db):
 	genesisAccount = {"address":'cxa65cfc9af6b7daae5811836e1b49c8d2570c9387', "balance":defaultdict(int), "nonce":0}
 	genesisAccount['balance']['cic'] = 5000000000000000000000000000
-	db.put("trie/balanceDB", 'cxa65cfc9af6b7daae5811836e1b49c8d2570c9387'.encode(), pickle.dumps(genesisAccount))
+	db["balanceDB"].put('cxa65cfc9af6b7daae5811836e1b49c8d2570c9387'.encode(), pickle.dumps(genesisAccount))
 	feeAddr = config["feeAddress"]
 	feeAccount = {"address": feeAddr, "balance":defaultdict(int), "nonce":0}
 	feeAccount['balance']['cic'] = 1000
-	db.put("trie/balanceDB", feeAddr.encode(), pickle.dumps(feeAccount))
-	db.put("trie/balanceDB", config["tokenName"].encode(), pickle.dumps(['cic', 'now']))
-	Database.createBlock(genesisBlock)
+	db["balanceDB"].put(feeAddr.encode(), pickle.dumps(feeAccount))
+	db["balanceDB"].put(config["tokenName"].encode(), pickle.dumps(['cic', 'now']))
+	Database.createBlock(genesisBlock, db)
 
 	CCRNonceKey = config["currNonceCCR"]
 	beginBlockNum = config["currBTCRelayBlock"]
-	db.put("trie/configDB", CCRNonceKey.encode(), pickle.dumps(1))
-	db.put("trie/configDB", beginBlockNum.encode(), pickle.dumps(533402))
+	db["configDB"].put(CCRNonceKey.encode(), pickle.dumps(1))
+	db["configDB"].put(beginBlockNum.encode(), pickle.dumps(533402))
 #key = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(38))
 
 
 #print(key)
-def init_transaction():
+def init_transaction(db):
 	feeAddr = config["feeAddress"]
 	key = '97ddae0f3a25b92268175400149d65d6887b9cefaf28ea2c078e05cdc15a3c0a'
 	t = time.time()
@@ -66,7 +73,7 @@ def init_transaction():
 		
 		#print(transaction['txid'])
 		transactions.append(transaction)
-		flag = Database.pendingTransaction(transaction)
+		flag = Database.pendingTransaction(transaction, db)
 		if not flag:
 			print("Something wrong!")
 		"""
@@ -88,7 +95,7 @@ def init_transaction():
 	}
 
 	transaction = Transaction.newTransaction(transaction, feeKey)
-	flag = Database.pendingTransaction(transaction)
+	flag = Database.pendingTransaction(transaction, db)
 	if not flag:
 		print("Something wrong!")
 	"""
@@ -99,13 +106,26 @@ def init_transaction():
 	
 	print((time.time()-t))
 	"""
-def main():
-	clearAllDB()
-	init_account()
-	init_transaction()
+def main(db):
+	clearAllDB(db)
+	init_account(db)
+	init_transaction(db)
 
 if __name__ == "__main__":
-	main()
+	#con = config()
+	blockDB = plyvel.DB(config["blockDB"], create_if_missing=True)
+	transactionDB = plyvel.DB(config["transactionDB"], create_if_missing=True)
+	rootDB = plyvel.DB(config["rootDB"], create_if_missing=True)
+	balanceDB = plyvel.DB(config["balanceDB"], create_if_missing=True)
+	configDB = plyvel.DB(config["configDB"], create_if_missing=True)      
+	top = {
+            "blockDB":blockDB,
+            "transactionDB":transactionDB,
+            "rootDB":rootDB,
+            "balanceDB":balanceDB,
+            "configDB":configDB  
+          }
+	main(top)
 
 """
 {'privateKey': '8c1eba13a46fd0e18ee22e5e3da7cf139977090040622a83', 'version': '1', 

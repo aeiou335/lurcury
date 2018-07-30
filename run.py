@@ -7,14 +7,14 @@ import time
 import json
 
 class lurcury:
-	def main():
+	def main(conn):
 		#fntdb = Database()
 
-		currentBlockNum = Database.getBlockNumber()
+		currentBlockNum = Database.getBlockNumber(conn)
 		print('getBlockNumber:', currentBlockNum)
 		if currentBlockNum == 0:
 			genesisBlock = Genesis.genesis()
-			Database.createBlock(genesisBlock)
+			Database.createBlock(genesisBlock, conn)
 		else:
 			while True:
 			#for j in range(3):
@@ -24,7 +24,7 @@ class lurcury:
 				#while True:
 				t = time.time()
 				for i in range(1000):
-					pendingTran = Database.getPendingTransaction()
+					pendingTran = Database.getPendingTransaction(conn)
 					print("getPendingTranTime:", time.time()-t)
 					t = time.time()
 					if pendingTran == {}:
@@ -36,12 +36,12 @@ class lurcury:
 						print("verifyTranTime:", time.time()-t)
 						t = time.time()
 						#balance verify and nonce
-						if not Database.verifyBalanceAndNonce(pendingTran):
+						if not Database.verifyBalanceAndNonce(pendingTran, conn):
 							print("verify balance and nonce error")
 							continue
 						print("verifyBalnceTime:", time.time()-t)
 						t = time.time()
-						if not Database.updateBalanceAndNonce(pendingTran):
+						if not Database.updateBalanceAndNonce(pendingTran, conn):
 							print("update error")
 							continue
 						print("updateBalanceTime:", time.time()-t)
@@ -50,12 +50,12 @@ class lurcury:
 					transactions.append(pendingTran)
 				print("time:", time.time()-t)
 				#print("newBlock:", newBlock)
-				parentBlock = Database.getBlockByID(currentBlockNum-1)
+				parentBlock = Database.getBlockByID(currentBlockNum-1, conn)
 				key = '97ddae0f3a25b92268175400149d65d6887b9cefaf28ea2c078e05cdc15a3c0a'
 				#print('parent', parentBlock)
 				newBlock = Block.newBlock_POA(newBlock, parentBlock, key)
 				try:
-					Database.createBlock(newBlock)
+					Database.createBlock(newBlock, conn)
 				except:
 					print('Error occurs when saving block into db.')
 					continue
@@ -66,12 +66,12 @@ class lurcury:
 					continue
 				for transaction in transactions:
 					try:
-						Database.createTransaction(transaction)
+						Database.createTransaction(transaction, conn)
 					except:
 						print("Error occurs when saving transaction into db.")
 						continue
 
-lurcury.main()	
+#lurcury.main()	
 #getBlockNumber
 #if(blockNumber == null):
 #--getBlockNumber

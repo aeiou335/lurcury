@@ -4,6 +4,7 @@ import sys
 from crypto.basic import *#Hash_c
 #sys.path.append('core')
 from config import config
+import time
 
 class Code:
     def transactionEncode(transaction):
@@ -121,7 +122,7 @@ transaction = {
     "type":"btc",
     "input":"90f4ccd100000000000000000000000000000"
 }
-print(Input.tokenPublish(transaction))
+#print(Input.tokenPublish(transaction))
 
 #x = Transaction.newTransaction(Transaction.newTransaction(transaction,"97ddae0f3a25b92268175400149d65d6887b9cefaf28ea2c078e05cdc15a3c0a"),"97ddae0f3a25b92268175400149d65d6887b9cefaf28ea2c078e05cdc15a3c0a")
 #print(x)
@@ -130,10 +131,12 @@ print(Input.tokenPublish(transaction))
 #print(Code.transactionEncode(x))
 #b = Code.transactionEncode(x)
 #print(Code.transactionDecode(b))
-#pub = '7b83ad6afb1209f3c82ebeb08c0c5fa9bf6724548506f2fb4f991e2287a77090177316ca82b0bdf70cd9dee145c3002c0da1d92626449875972a27807b73b42e'
-#en = '000000000000000000000000000001000000000000000000000000000010cic00000000000000000000000000001040cxnIQqsD2gBHcch94c7pQaVLXvHg7USoQmPywn27cic'
-#sign = 'ef24fcfd466eb8aeaebc9843f1cbd81cd305047306ce71eb1d7062d28565b43266f6286f6789e1c27670cbe2fd0ece3106ff94bc051a03b2f57aa503e08dcab2'
-#signature_c.verify(sign,en.encode(),pub)
+pub = '7b83ad6afb1209f3c82ebeb08c0c5fa9bf6724548506f2fb4f991e2287a77090177316ca82b0bdf70cd9dee145c3002c0da1d92626449875972a27807b73b42e'
+en = '000000000000000000000000000001000000000000000000000000000010cic00000000000000000000000000001040cxnIQqsD2gBHcch94c7pQaVLXvHg7USoQmPywn27cic'
+sign = 'ef24fcfd466eb8aeaebc9843f1cbd81cd305047306ce71eb1d7062d28565b43266f6286f6789e1c27670cbe2fd0ece3106ff94bc051a03b2f57aa503e08dcab2'
+print(time.time())
+print(signature_c.verify(sign,en.encode(),pub))
+print(time.time())
 '''
 =======
 #print(x)

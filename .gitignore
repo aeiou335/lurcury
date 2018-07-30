@@ -6,6 +6,7 @@ trie/testdb
 trie/btcRelayDB
 trie/rootdb
 trie/configDB
+testdb/
 trie/__pycache__
 core/__pycache__
 crypto/__pycache__
