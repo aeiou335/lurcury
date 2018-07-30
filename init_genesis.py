@@ -58,8 +58,8 @@ def init_transaction(db):
 	key = '97ddae0f3a25b92268175400149d65d6887b9cefaf28ea2c078e05cdc15a3c0a'
 	t = time.time()
 	for i in range(9):
-		if i % 100 == 0:
-			print(time.time()-t)
+		
+		print(time.time()-t)
 		transactions = []
 		transaction = {}
 		transaction['fee'] = '10'
@@ -107,8 +107,11 @@ def init_transaction(db):
 	print((time.time()-t))
 	"""
 def main(db):
+	print("Clear All")
 	clearAllDB(db)
+	print("Init Account")
 	init_account(db)
+	print("Init Transaction")
 	init_transaction(db)
 
 if __name__ == "__main__":

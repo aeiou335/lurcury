@@ -9,7 +9,6 @@ import json
 class lurcury:
 	def main(conn):
 		#fntdb = Database()
-
 		currentBlockNum = Database.getBlockNumber(conn)
 		print('getBlockNumber:', currentBlockNum)
 		if currentBlockNum == 0:
@@ -24,10 +23,11 @@ class lurcury:
 				#while True:
 				t = time.time()
 				for i in range(1000):
-					pendingTran = Database.getPendingTransaction(conn)
+					#pendingTran = Database.getPendingTransaction(conn)
+					pendingTran = conn["pt"].pop(0)
 					print("getPendingTranTime:", time.time()-t)
 					t = time.time()
-					if pendingTran == {}:
+					if pendingTran == []:
 						print('There is no pending transaction now.')
 						continue
 					else:
@@ -39,7 +39,7 @@ class lurcury:
 						if not Database.verifyBalanceAndNonce(pendingTran, conn):
 							print("verify balance and nonce error")
 							continue
-						print("verifyBalnceTime:", time.time()-t)
+						rint("verifyBalnceTime:", time.time()-t)
 						t = time.time()
 						if not Database.updateBalanceAndNonce(pendingTran, conn):
 							print("update error")

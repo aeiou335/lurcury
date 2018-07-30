@@ -20,26 +20,21 @@ class Database():
 		#Insert newTransaction which hasn't verified into the database
 		#transactionDB = db.DB("trie/transactionDB")
 		con = config.config()
-		key = con['pendingTransaction']
-		#print("pendingKey:", key)
+		requireFee = con["requiredFee"]
+		con = config.config()
+		feeAddress = con["feeAddress"]
+		fee = newTransaction['fee']
+		feeAccount = pickle.loads(db["balanceDB"].get(feeAddress.encode()))
+		feeAccount['balance']['cic'] += int(fee)
 		try:
-			pending = pickle.loads(db["transactionDB"].get(key.encode()))
+			db["balanceDB"].put(feeAddress.encode(), pickle.dumps(feeAccount))
 		except:
-			pending = []
-		#print(len(pending))
-		requireFee = 5
-		if int(newTransaction['fee']) > requireFee: 
-			#print('new:',newTransaction)
-			pending.append(newTransaction)
-			#print('pending after append:', pending)
-		else: 
-			return False
-		try:
-			db["transactionDB"].put(key.encode(), pickle.dumps(pending))
-			return True
-		except:
-			return False
-
+			return False 
+		if int(newTransaction['fee']) >= int(requireFee): 
+			db["pt"].append(newTransaction)
+		#if Database.verifyBalanceAndNonce(newTransaction, db):
+		#	db["pt"].append(newTransaction)
+	
 	def getPendingTransaction(db):
 		#Return the pending transaction with the largest fee
 		#transactionDB = db.DB("trie/transactionDB")
@@ -100,6 +95,21 @@ class Database():
 		except:
 			print('idk')
 			return False
+		if len(transaction['input']) > 7 and transaction["input"][:4] == "90f4":
+                        name = transaction['input'][4:7]
+                        con = config.config()
+                        feeAddress = con["feeAddress"]
+                        try:
+                                amount = int(transaction["input"][7:])
+                        except:
+                                return False
+                        requiredFee = 10
+                        if int(transaction['out']['cic']) < requiredFee:
+                                return False
+                        if transaction['to'] != feeAddress:
+                                return False
+                        if name in currName:
+                                return False
 		print(accountData['nonce'], int(transaction['nonce']))
 		if accountData['nonce']+1 != int(transaction['nonce']):
 			return False
@@ -111,6 +121,7 @@ class Database():
 		#balanceDB = db.DB("trie/balanceDB")
 		con = config.config()
 		feeAddress = con["feeAddress"]
+		"""
 		fee = transaction['fee']
 		feeAccount = pickle.loads(db["balanceDB"].get(feeAddress.encode()))
 		feeAccount['balance']['cic'] += int(fee)
@@ -119,7 +130,7 @@ class Database():
 			db["balanceDB"].put(feeAddress.encode(), pickle.dumps(feeAccount))
 		except:
 			return False
-
+		"""
 		try:
 			if transaction['type'] == "btc":
 				sender = Key_c.bitcoinaddress(transaction["publicKey"])
@@ -144,26 +155,14 @@ class Database():
 		senderAccount['nonce'] += 1
 		
 		currName = pickle.loads(db["balanceDB"].get(con["tokenName"].encode()))
-		if 'input' in transaction:
-			print('input:',transaction['input'])
-			if len(transaction['input']) > 7:
-				msg = transaction['input']
-				print('msg:', msg)
-				if msg[:4] == '90f4':
-					name = msg[4:7]
-					try:
-						amount = int(msg[7:])
-					except:
-						return False
-					requiredFee = 10
-					if int(transaction['out']['cic']) < requiredFee:
-						return False
-					if transaction['to'] != feeAddress:
-						return False
-					if name in currName:
-						return False
-				currName.append(name)
-				senderAccount['balance'][name] += amount
+		if len(transaction['input']) > 7 and transaction["input"][:4] == "90f4":
+			name = transaction['input'][4:7]
+			try:
+				amount = int(transaction["input"][7:])
+			except:
+				return False
+			currName.append(name)
+			senderAccount['balance'][name] += amount
 		print("senderAccount:", int(senderAccount['balance']['cic']))
 		print("currName:", currName)
 		receiver = transaction["to"]

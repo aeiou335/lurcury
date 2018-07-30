@@ -2,7 +2,7 @@
 class config:
     def config():
         config = {
-            "fee":"5",
+            "requiredFee":"5",
             "tokenPublishfee":"10000",
             "feeAddress":"1NUik3tsajkDU8N3xhpBfMkKnS9cPJRDHH",
             "receiveAddress":"16yvczqzg526o7q52r9td4sryggmjtpud7",
