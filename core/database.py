@@ -61,8 +61,8 @@ class Database():
 				print("btc")
 				address = Key_c.bitcoinaddress(transaction["publicKey"])
 			elif transaction['type'] == "btcc":
-								print("btcc")
-								address = Key_c.bitcoinaddress_compress(transaction["publicKey"])
+				print("btcc")
+				address = Key_c.bitcoinaddress_compress(transaction["publicKey"])
 			elif transaction['type'] == "eth":
 				print("eth")
 				address = Key_c.ethereumaddress(transaction["publicKey"])

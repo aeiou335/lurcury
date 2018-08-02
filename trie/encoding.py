@@ -5,6 +5,14 @@ def raw_to_hex(string):
         _hex += divmod(ord(s), 16)
     return _hex
 
+def hex_to_raw(hexarray):
+    assert len(hexarray) % 2 == 0
+    result = ""
+    for i in range(0, len(hexarray), 2):
+        result += chr(16 * hexarray[i] + hexarray[i + 1])
+
+    return result
+
 def hex_to_hp(hexarray):
     #print(hexarray)
     assert isinstance(hexarray, list), "Input must be list!"
@@ -50,3 +58,4 @@ def terminator(nib, has_terminator):
         if nib[-1] == 16:
             del nib[-1]
     return nib
+

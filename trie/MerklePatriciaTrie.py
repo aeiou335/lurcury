@@ -18,7 +18,7 @@ class MerklePatriciaTrie:
         self.initial_root_hash(_root_hash)
         
     def initial_root_hash(self,root):
-        if root == None:
+        if root == "":
             return ""
         print('root:', root)
         node = self.db.get(root)
@@ -34,7 +34,7 @@ class MerklePatriciaTrie:
 
     def root_hash(self):
         if self.root == "":
-            return "None"
+            return ""
         hash_key = self.update_db(self.root)
         #print("Call root_hash and the current root hash is", hash_key)
         return hash_key
@@ -306,9 +306,101 @@ class MerklePatriciaTrie:
             return sum(count)+1
 
     def count_key_num(self):
-       return self._count_key_num(self.root)
+        return self._count_key_num(self.root)
 
+    def _iter_subtree(self, node):
+        _node_type = self.node_type(node)
+        if _node_type == "Blank":
+            return {}
 
+        if _node_type == "Branch":
+            result = {}
+            for i in range(16):
+                res = self._iter_subtree(self.decode(node[i]))
+                for key, value in res.items():
+                    #print("key:",key)
+                    original_key = str(i) + "," + key
+                    #print("ori:",original_key)
+                    result[original_key] = value
+                if node[-1]:
+                    result["16"] = node[-1]
+            return result
+
+        tmp = encoding.terminator(encoding.hp_to_hex(node[0]), False)
+        key = ",".join([str(t) for t in tmp])
+        if _node_type == "Extension":
+            res = self._iter_subtree(self.decode(node[1]))
+        if _node_type == "Leaf":
+            res = {"16":node[1]}
+
+        result = {}
+        for key2, value in res.items():
+            print('key:', key, "key2:", key2, "value:", value)
+            original_key = key + "," + key2
+            result[original_key] = value
+        return result
+
+    def search_prefix(self, node, prefix, curr_prefix):
+        _node_type = self.node_type(node)
+        print("type:", _node_type)
+        #check this type
+        #print("prefix:",prefix)
+        if not prefix:
+            return node, curr_prefix
+        if _node_type == "Blank":
+            return "", curr_prefix
+
+        if _node_type == "Branch":
+            if not prefix:
+                return node, curr_prefix
+            child = node[prefix[0]]
+            curr_prefix += [prefix[0]]
+            #print(self.decode(child))
+            node, curr_prefix = self.search_prefix(self.decode(child), prefix[1:], curr_prefix)
+            return node, curr_prefix
+
+        #leaf node or extension node
+        key = encoding.terminator(encoding.hp_to_hex(node[0]), False)
+        if _node_type == "Leaf":
+            #print("prefix:", prefix, "key:", key)
+            if len(prefix) < len(key) and prefix == key[:len(prefix)]:
+                return node, curr_prefix
+            else:
+                return "", curr_prefix
+
+        if _node_type == "Extension":
+            print("extendsion node:", node, "key:", key, "prefix:", prefix)
+            if len(prefix) < len(key) and prefix == key[:len(prefix)]:
+                return node, curr_prefix
+            elif prefix not in key and len(prefix) < len(key):
+                return "", curr_prefix
+            elif len(prefix) > len(key) and prefix[:len(key)] != key:
+                return "", curr_prefix
+            else:
+                curr_prefix += key
+                node, curr_prefix = self.search_prefix(self.decode(node[1]), prefix[len(key):], curr_prefix)
+                return node, curr_prefix
+
+    def iter_subtree(self, prefix):
+        #get all key, value start with the same prefix
+        node, curr_prefix = self.search_prefix(self.root, encoding.raw_to_hex(prefix), [])
+        print("node:", node)
+        if node == "":
+            return {}
+        res = self._iter_subtree(node)
+        #encoding_prefix = encoding.raw_to_hex(prefix)
+        #print("encoding_prefix:", encoding_prefix)
+        print(node)
+        result = {}
+        for key, value in res.items():
+            key = [int(k) for k in key.split(',')]
+            total_key = curr_prefix + key
+            print("total:",total_key)
+            print(encoding.raw_to_hex('h7777'))
+            total_key = encoding.hex_to_raw(encoding.terminator(total_key, False))
+            result[total_key] = value
+
+        return result
 
 
 
