@@ -9,7 +9,7 @@ from db import DB as db
 import MerklePatriciaTrie as MPT
 sys.path.append('core')
 from transaction import Transaction
-from bitcoinRPC import *
+from chainRPC import *
 
 
 class bitcoinInfo: 

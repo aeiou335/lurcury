@@ -10,7 +10,7 @@ class bitcoinRPC():
                                 auth=(self.user, self.password)
                                 )
         z = json.loads(r.text[:1000000000])
-        print(self.url)
+        #print(self.url)
         t = requests.post(url=self.url,
                                 data='{"jsonrpc": "1.0", "id":"curltest", "method": "getblock", "params": ["'+z["result"]+'"] }',
                                 headers={"content-type": "text/plain"},
@@ -49,7 +49,27 @@ class bitcoinRPC():
         self.url = "http://192.168.51.33:8332"
         self.user = "bitcoinrpc" 
         self.password = "bitcoinrpctest"
+
+class ethRPC():
+    def __init__(self):
+        self.url = "https://mainnet.infura.io/"
+
+    def getBlockbyNum(self, num):
+        h = hex(num)
+        t = requests.post(url=self.url, data='{"jsonrpc":"2.0","method":"eth_getBlockByNumber","params":["'+h+'", true],"id":1}')
+        return t.text[:1000000000]
+
+    def getTransaction(self, tranHash):
+        t = requests.post(url = self.url, 
+                            data='{"jsonrpc":"2.0","method":"eth_getTransactionByHash","params":["'+ tranHash +'"],"id":1}')
+        return t.text[:1000000000]
+
+    def getTransactionRe(self, tranHash):
+        t = requests.post(url = self.url, 
+                            data='{"jsonrpc":"2.0","method":"eth_getTransactionReceipt","params":["'+ tranHash +'"],"id":1}')
+        return t.text[:1000000000]
 #o = bitcoinRPC().bitcoinrpc("getblockhash","[1]")
 #print(o)
 #io = bitcoinRPC().blocknumber()
-#print(io)
+print(ethRPC().getBlockbyNum(10000))
+#print(ethRPC().getTransactionRe("0xe1afb70dc68dd9c7c4346bfa542329b7b875b83dbd69561b9784df06810bf0d8"))

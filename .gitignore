@@ -11,3 +11,4 @@ trie/__pycache__
 core/__pycache__
 crypto/__pycache__
 *.pyc
+.vscode/

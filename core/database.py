@@ -148,14 +148,23 @@ class Database():
 		senderAccount['nonce'] += 1
 		
 		currName = pickle.loads(db["balanceDB"].get(con["tokenName"].encode()))
-		if len(transaction['input']) > 7 and transaction["input"][:4] == "90f4":
-			name = transaction['input'][4:7]
-			try:
-				amount = int(transaction["input"][7:])
-			except:
-				return False
-			currName.append(name)
-			senderAccount['balance'][name] += amount
+		if len(transaction['input']) > 7:
+			code = transaction["input"][:4]
+			if code == "90f4":
+				name = transaction['input'][4:7]
+				try:
+					amount = int(transaction["input"][7:])
+				except:
+					return False
+				currName.append(name)
+				senderAccount['balance'][name] += amount
+			elif code == "11ae":
+				if len(transaction["input"]) == 150:
+					address = transaction["input"][4:48]
+					to = transaction["input"][48:90]
+					amount = transaction["input"][90:120]
+					nonce = transaction["input"][120:]
+
 		print("senderAccount:", int(senderAccount['balance']['cic']))
 		print("currName:", currName)
 		receiver = transaction["to"]
