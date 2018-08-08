@@ -3,11 +3,11 @@ import pickle
 import time 
 import datetime 
 import json 
-def updateBlockStatus(conn, _hash, blockNum, parentHash, tx, _type): 
-    u0SQL = "INSERT [dbo].[{}_block] ( [hash], [blocknumber], [parenthash], [transactions]) VALUES (%s, %d, %s, %s)".format(_type)
+def updateBlockStatus(conn, _hash, blockNum, parentHash, tx, miner, _type): 
+    u0SQL = "INSERT [dbo].[{}_block] ( [hash], [blocknumber], [parenthash], [transactions], [miner]) VALUES (%s, %d, %s, %s, %s)".format(_type)
     print(u0SQL)
     cur2=conn.cursor() 
-    cur2.execute(u0SQL,(_hash, blockNum, parentHash, tx)) 
+    cur2.execute(u0SQL,(_hash, blockNum, parentHash, tx, miner)) 
     conn.commit()
 
 def updateTxStatus(conn, _hex, txid, tranhash, blockhash):

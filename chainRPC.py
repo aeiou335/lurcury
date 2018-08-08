@@ -78,4 +78,4 @@ class ethbybRPC():
 #io = bitcoinRPC().blocknumber()
 #print(ethRPC().getBlockbyNum(10000))
 #print(ethRPC().getTransactionRe("0xe1afb70dc68dd9c7c4346bfa542329b7b875b83dbd69561b9784df06810bf0d8"))
-#print(ethRPC().getBlockNum())
+print(bitcoinRPC().blockInfo(10))

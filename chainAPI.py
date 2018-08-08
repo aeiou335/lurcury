@@ -62,8 +62,9 @@ def parseEthBlock(info, sql, conn, rpc, _type):
 	blockNum = int(info["number"], 0)
 	parentHash = info["parentHash"]
 	transactions = info["transactions"]
+	miner = info["miner"]
 	tx = json.dumps(transactions)
-	pysql.updateBlockStatus(conn, _hash, blockNum, parentHash, tx, _type)
+	pysql.updateBlockStatus(conn, _hash, blockNum, parentHash, tx, miner,  _type)
 	if not transactions:
 		return 0
 	for tran in transactions:
