@@ -1,5 +1,6 @@
 import requests 
-import json 
+import json
+import time 
 import pickle
 import pysql
 import queue
@@ -9,10 +10,10 @@ import sys
 sys.path.append('trie')
 import db as db
 import MerklePatriciaTrie as MPT 
-from chainRPC import bitcoinRPC, ethRPC
+from chainRPC import bitcoinRPC, ethbybRPC
 
 que = queue.Queue()
-for i in range(300000,300101):
+for i in range(500000,500101):
 	que.put(i)
 
 #_hash, height, merkleroot, tx, _time, previousblockhash, difficulty, reward
@@ -40,56 +41,50 @@ class thread(threading.Thread):
 tran: blockHash, blockNumber, from, gas, gasPrice, hash, input, nonce, to, value
 tranRe: blockHash, blockNumber, contractAddress, cumulativeGasUsed, from, gasUsed, logs, logsBloom, status, to, transactionHash, transactionIndex
 """
-def parseEthTran(transaction):
+def parseEthTran(conn, transaction, rpc, _type):
 	#print("tran:",transaction)
-	blockHash = transaction["blockHash"]
-	blockNumber = transaction["blockNumber"]
-	_from = transaction["from"]
-	gas = transaction["gas"]
-	gasPrice = transaction["gasPrice"]
-	_hash = transaction["hash"]
-	_input = transaction["input"]
-	nonce = transaction["nonce"]
-	to = transaction["to"]
-	value = transaction["value"] 
-	traninfo = ethRPC().getTransaction(_hash)
-	tranRe = ethRPC().getTransactionRe(_hash)
-	print("RE:",tranRe)
+	blockHash, blockNumber, _from, gas = transaction["blockHash"], transaction["blockNumber"], transaction["from"], transaction["gas"]
+	gasPrice, _hash, _input, nonce = transaction["gasPrice"], transaction["hash"], transaction["input"], transaction["nonce"]
+	to, value = transaction["to"], transaction["value"]
+	blockNumber, gas, gasPrice, nonce = int(blockNumber, 0), int(gas, 0), int(gasPrice, 0), int(nonce, 0)
+	pysql.updateEthTxStatus(conn, blockHash, blockNumber, _from, gas, gasPrice, _hash, _input, nonce, to, value, _type)
+	#traninfo = ethRPC().getTransaction(_hash)
+	tranRe = rpc.getTransactionRe(_hash)
+	#print("RE:",tranRe)
+	re = json.loads(tranRe)["result"]
+	contractAddress, cumulativeGasUsed, gasUsed, logs = re["contractAddress"], re["cumulativeGasUsed"], re["gasUsed"], json.dumps(re["logs"])
+	logsBloom, to, transactionHash, transactionIndex = re["logsBloom"], re["to"], re["transactionHash"], re["transactionIndex"]
+	cumulativeGasUsed, gasUsed, transactionIndex = int(cumulativeGasUsed, 0), int(gasUsed, 0), int(transactionIndex, 0)
+	pysql.updateEthTxReStatus(conn, blockHash, blockNumber, contractAddress, cumulativeGasUsed, _from, gasUsed, logs, logsBloom, to, transactionHash, transactionIndex, _type)
 #hash, blockNumber, parentHash, transactions
-def parseEthBlock(info, sql, conn):
+def parseEthBlock(info, sql, conn, rpc, _type):
 	_hash = info["hash"]
-	blockNum = info["number"]
+	blockNum = int(info["number"], 0)
 	parentHash = info["parentHash"]
 	transactions = info["transactions"]
-	#pysql.updateBlockStatus(conn, _hash, blockNum, parentHash, tx)
-	#print(info)
+	tx = json.dumps(transactions)
+	pysql.updateBlockStatus(conn, _hash, blockNum, parentHash, tx, _type)
 	if not transactions:
 		return 0
 	for tran in transactions:
-		parseEthTran(tran)
-		
+		parseEthTran(conn, tran, rpc, _type)
 
 
 
 #hash blockNumber parentHash transactions
 def parseBtcBlock(info, sql, conn):
-	print(info)
-
 	_hash = info['hash']
 	blockNum = info["height"]
 	txs = info['tx']
-	tx = ""
-	for t in txs:
-		tx += t
+	tx = json.dumps(txs)
 	try:
 		parentHash = info['previousblockhash']
 	except:
 		parentHash = ""
-	pysql.updateBlockStatus(conn, _hash, blockNum, parentHash, tx)
+	pysql.updateBlockStatus(conn, _hash, blockNum, parentHash, tx, "btc")
 	#hex, txid, hash, blockhash 
 	for t in txs:
 		tran = json.loads(bitcoinRPC().transaction(t))["result"]
-		print("tran:", tran)
 		if tran == None:
 			break
 		
@@ -99,8 +94,6 @@ def parseBtcBlock(info, sql, conn):
 		tranhash = tran["hash"]
 		vins = tran['vin']
 		vouts = tran['vout']
-		print("vins:",vins)
-		print("vouts:",vouts)
 		pysql.updateTxStatus(conn, _hex, txid, tranhash, blockhash)
 		#unspendtxid, txid, vout, coinbase
 		for vin in vins:
@@ -119,8 +112,6 @@ def parseBtcBlock(info, sql, conn):
 				scriptSig_hex = scriptSig['hex']
 				"""
 			pysql.updateVinStatus(conn, unspendtxid, txid, vin_vout, coinbase)
-			#print(vin)
-			#print(vout)
 		for vout in vouts:
 			value = vout['value']
 			n = vout['n']
@@ -141,11 +132,51 @@ def parseBtcBlock(info, sql, conn):
  
 def main():
 	sql,conn = pysql.sqlcon('192.168.51.11','bc_developer','d!tRv36B','BlockChain')
-	num = 10
+	readBtcBlock = 0
+	readEthBlock = 0
+	readBybBlock = 0
+	ethRPC = ethbybRPC("https://mainnet.infura.io/")
+	bybRPC = ethbybRPC("http://10.0.7.16:9500")
+	while True:
+		currBtcBlock = json.loads(bitcoinRPC().blocknumber())["result"]
+		currEthBlock = int(json.loads(ethRPC.getBlockNum())["result"],0)
+		print(bybRPC.getBlockNum())
+		currBybBlock = int(json.loads(bybRPC.getBlockNum())["result"],0)
+		print("readBtcBlock:", readBtcBlock)
+		print("currBtcBlock", currBtcBlock)
+		print("readEthBlock:", readEthBlock)
+		print("currEthBlock:", currEthBlock)
+		print("readBybBlock:", readBybBlock)
+		print("currBybBlock:", currBybBlock)
+		if readBtcBlock+5 >= currBtcBlock and readEthBlock+5 >= currEthBlock:
+			time.sleep(60)
+			continue
+		"""
+		while readEthBlock+5 < currEthBlock:
+			info = json.loads(ethRPC.getBlockbyNum(readEthBlock))
+			parseEthBlock(info["result"], sql, conn, ethRPC, "eth")
+			readEthBlock += 1
+			print("readEthBlock:", readEthBlock)
+		"""
+		while readBybBlock+5 < currBybBlock:
+			info = json.loads(bybRPC.getBlockbyNum(readBybBlock))
+			parseEthBlock(info["result"], sql, conn, bybRPC, "byb")
+			readBybBlock += 1
+			print("readBybBlock:", readBybBlock)
+		while readBtcBlock+5 < currBtcBlock:
+			info = json.loads(bitcoinRPC().blockInfo(str(readBtcBlock)))
+			parseBtcBlock(info["result"], sql, conn)
+			readBtcBlock += 1
+			print("readBtcBlock:", readBtcBlock)
+	"""
+	que = queue.Queue()
+	for i in range(500000,500101):
+		que.put(i)
 	
 	threads = []
 	threadLock = threading.Lock()
 	for i in range(1):
+		threads.append(thread(i, "thread_{}".format(i), sql, conn, threadLock, "btc"))
 		threads.append(thread(i, "thread_{}".format(i), sql, conn, threadLock, "eth"))
 	for t in threads:
 		t.start()
@@ -154,7 +185,7 @@ def main():
 	#print(pysql.selectStatus(sql, "transaction"))
 	#print(pysql.selectStatus(sql, "transaction_vin"))
 	#print(pysql.selectStatus(sql, "transaction_vout"))
-
+	"""
 if __name__ == '__main__':
 	main()
 
