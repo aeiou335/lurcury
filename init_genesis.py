@@ -21,8 +21,8 @@ config = config.config()
 #balanceDB = db.DB("trie/balanceDB")
 #configDB = db.DB("trie/configDB")
 def deleteAll(db):
-        for key, value in db:
-            db.delete(key)
+    for key, value in db:
+        db.delete(key)
 
 def clearAllDB(db):
 	for key in db:
@@ -43,7 +43,7 @@ def init_account(db):
 	feeAccount['balance']['cic'] = 1000
 	db["balanceDB"].put(feeAddr.encode(), pickle.dumps(feeAccount))
 	db["balanceDB"].put(config["tokenName"].encode(), pickle.dumps(['cic', 'now']))
-	Database.createBlock(genesisBlock, db)
+	Database.createBlock([genesisBlock], db)
 
 	CCRNonceKey = config["currNonceCCR"]
 	beginBlockNum = config["currBTCRelayBlock"]
@@ -137,3 +137,5 @@ if __name__ == "__main__":
 'address': 'cx6e3d4550ef058740705ebc7fcf392379c72f11fc', 'type': 'cic', 
 'publicKey': 'bbc60d5af15a41d01323a22e43bbdcd1b2045b6d931c877cef8dd2153fdf4617b4839ad71e083da8d6dae8b0aff0c058'}
 """
+
+

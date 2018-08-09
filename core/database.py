@@ -187,7 +187,7 @@ class Database():
 		except:
 			return False
 
-	def createTransaction(transaction, db):
+	def createTransaction(transactions, db):
 		#Push transaction into database
 		#Todo: Transaction Trie
 		#rootDB = db.DB("trie/rootDB")
@@ -197,7 +197,8 @@ class Database():
 		except:
 			root = ""
 		trie = MPT.MerklePatriciaTrie(db["transactionDB"], root)
-		trie.update(transaction['txid'], transaction)
+		for transaction in transactions:
+			trie.update(transaction['txid'], transaction)
 		new_root = trie.root_hash()
 		db["rootDB"].put(b'TransactionTrie', new_root)
 	"""
@@ -206,7 +207,7 @@ class Database():
 		blockData['transaction'].append(transaction)
 		return blockData
 	"""
-	def createBlock(blockData, db):
+	def createBlock(blockDatas, db):
 		#Push block into database
 		#Todo: Block Trie
 		#rootDB = db.DB("trie/rootDB")
@@ -217,7 +218,8 @@ class Database():
 			root = ""
 		print('root:', root)
 		trie = MPT.MerklePatriciaTrie(db["blockDB"], root)
-		trie.update(blockData['hash'], blockData)
+		for blockData in blockDatas:
+			trie.update(blockData['hash'], blockData)
 		new_root = trie.root_hash()
 		#print('new root:', new_root)
 		db["rootDB"].put(b'BlockTrie', new_root)
@@ -242,4 +244,20 @@ class Database():
 			return ""
 		return pickle.loads(block)
 
+	def getBlock(_hash):
+		try:
+			root = db["rootDB"].get(b"BlockTrie")
+		except:
+			root = ""
+		trie = MPT.MerklePatriciaTrie(db["blockDB"], root)
+		value = trie.search(_hash)
+		return value
 
+	def getTransaction(_hash):
+		try:
+			root = db["rootDB"].get(b"TransactionTrie")
+		except:
+			root = ""
+		trie = MPT.MerklePatriciaTrie(db["transactionDB"], root)
+		value = trie.search(_hash)
+		return value

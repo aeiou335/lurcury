@@ -13,7 +13,7 @@ class lurcury:
 		print('getBlockNumber:', currentBlockNum)
 		if currentBlockNum == 0:
 			genesisBlock = Genesis.genesis()
-			Database.createBlock(genesisBlock, conn)
+			Database.createBlock([genesisBlock], conn)
 		else:
 			#while True:
 			for j in range(1):
@@ -57,7 +57,7 @@ class lurcury:
 				print("newBlock_POATime:", time.time()-t)
 				t = time.time()
 				try:
-					Database.createBlock(newBlock, conn)
+					Database.createBlock([newBlock], conn)
 				except:
 					print('Error occurs when saving block into db.')
 					continue
