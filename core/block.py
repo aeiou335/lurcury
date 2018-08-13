@@ -52,11 +52,11 @@ class Block:
             "extraData":"",
             "ParentHash":"",
             "verify":[],
-            "transactions":[]
+            "transaction":[]
         }
         return blockData
     def pushTransactionToArray(blockData, transaction):
-        blockData['transactions'].append(transaction)
+        blockData['transaction'].append(transaction)
         return blockData
         
     def newBlock_POA(blockData,parentblock,key):

@@ -87,9 +87,10 @@ class msgProtocol:
 
     def run(self):
         while True:
-            if not self.pm.recv_queue.empty():
-                msg = self.pm.recv_queue.get()
-                self.parseMsg(msg["data"])
-            time.sleep(1)
+            for key, value in self.pm.recv_queue():
+                if not value.empty():
+                    msg = value.get()
+                    self.parseMsg(msg["data"])
+                time.sleep(1)
 
 

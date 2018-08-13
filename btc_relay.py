@@ -17,21 +17,12 @@ class bitcoinInfo:
 		#transactionDB = db.DB("trie/transactionDB")
 		con = config.config()
 		key = con["pendingTransaction"]
-		try:
-			pending = pickle.loads(db["transactionDB"].get(key.encode()))
-		except:
-			pending = []
 		for t in transactions:
-			pending.append(t)
-		try:
-			db["transactionDB"].put(key.encode(), pickle.dumps(pending))
-			print("pending:",pickle.loads(db.get(key.encode())))
-			return True
-		except:
-			return False
-			
+			db["pt"].append(t)
+		return True
 	def parseTransaction(has): 
-		ourAccount = "1Pi1Spap6vdfAWJPfMkYUCtG4EYM5fPWeR"
+		con = config.config()
+		ourAccount = con["receiveAddress"]
 		
 		#r = requests.get("https://blockexplorer.com/api/tx/"+has) 
 		t = bitcoinRPC().transaction(has)
@@ -45,27 +36,35 @@ class bitcoinInfo:
 		flag = False
 		value = 0
 		address = ""
+		addressKey = "c2cccccc0000000000000001"
 		for i, transaction in enumerate(transactions):
 			#print(transaction)
 			try:
-				if transaction["scriptPubKey"]["addresses"][0] != ourAccount:
-					continue
-				else:
-					value = transaction['value']
-					flag = True
+				if i == len(transactions)-1:
+					if transaction["scriptPubKey"]["asm"][:9] == "OP_RETURN" and transaction["scriptPubKey"]["asm"][10:34] == addressKey and value != 0:
+						address = transaction["scriptPubKey"]["asm"][34:]
+						flag = True
+						#print(flag, vlaue, address)
+						return flag, value, address
+
+				if transaction["scriptPubKey"]["addresses"][0] == ourAccount:
+					print(transactions)
+					value += transaction['value']
+					"""
 					txid = t["vin"][0]["txid"]
 					out = t["vin"][0]["vout"]
 					print(txid, out)
 					originalt = json.loads(bitcoinRPC().transaction(txid))["result"]
-					
 					address = originalt["vout"][out]["scriptPubKey"]["addresses"][0]
+					"""
+
 			except:
 				continue
 			#elif i == len(transactions)-1 and flag:
 			#	address = transaction['scriptPubKey']['asm'][10:]
 		return flag, value, address
 
-	def blockTransaction():
+	def blockTransaction(db):
 		con = config.config()
 		#configDB = db.DB("trie/configDB")
 		currBlockkey = con["currBTCRelayBlock"]
@@ -103,8 +102,8 @@ class bitcoinInfo:
 						print("transaction:", transaction)
 						transactions.append(transaction)
 						
-				a = bitcoinInfo.pendingBTCRelay(transactions)
-				print(a)
+				a = bitcoinInfo.pendingBTCRelay(transactions, db)
+
 				currBlockRead += 1
 				db["configDB"].put(currBlockkey.encode(), pickle.dumps(currBlockRead))
 				db["configDB"].put(currNonceKey.encode(), pickle.dumps(currNonce))
@@ -114,6 +113,5 @@ class bitcoinInfo:
 		#new_root = trie.root_hash()
 		#rootDB.put(b"btcRelaytrie", new_root)
 
-	
 
-print(bitcoinInfo.blockTransaction())
+#print(bitcoinInfo.blockTransaction(top))

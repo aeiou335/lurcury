@@ -2,10 +2,10 @@
 class config:
     def config():
         config = {
-            "requiredFee":"5",
+            "requiredFee":"0",
             "tokenPublishfee":"10000",
             "feeAddress":"1NUik3tsajkDU8N3xhpBfMkKnS9cPJRDHH",
-            "receiveAddress":"16yvczqzg526o7q52r9td4sryggmjtpud7",
+            "receiveAddress":"1Pi1Spap6vdfAWJPfMkYUCtG4EYM5fPWeR",
             "feeToken":"cic",
             "blockSpeed":"2",
             "blockTransaction":"6000",

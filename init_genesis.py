@@ -48,7 +48,7 @@ def init_account(db):
 	CCRNonceKey = config["currNonceCCR"]
 	beginBlockNum = config["currBTCRelayBlock"]
 	db["configDB"].put(CCRNonceKey.encode(), pickle.dumps(1))
-	db["configDB"].put(beginBlockNum.encode(), pickle.dumps(533402))
+	db["configDB"].put(beginBlockNum.encode(), pickle.dumps(536547))
 #key = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(38))
 
 
@@ -57,7 +57,7 @@ def init_transaction(db):
 	feeAddr = config["feeAddress"]
 	key = '97ddae0f3a25b92268175400149d65d6887b9cefaf28ea2c078e05cdc15a3c0a'
 	t = time.time()
-	for i in range(999):
+	for i in range(9):
 		
 		print(time.time()-t)
 		transactions = []

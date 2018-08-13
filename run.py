@@ -15,14 +15,14 @@ class lurcury:
 			genesisBlock = Genesis.genesis()
 			Database.createBlock([genesisBlock], conn)
 		else:
-			#while True:
-			for j in range(1):
-				#time.sleep(2)
+			while True:
+			#for j in range(1):
+				time.sleep(1)
 				newBlock = Block.block()
 				transactions = []
 				#while True:
 				t = time.time()
-				for i in range(1000):
+				for i in range(10):
 					#pendingTran = Database.getPendingTransaction(conn) 
 					print("getPendingTranTime:", time.time()-t)
 					t = time.time()
@@ -65,12 +65,12 @@ class lurcury:
 				t = time.time()
 				if len(transactions) == 0:
 					continue
-				for transaction in transactions:
-					try:
-						Database.createTransaction(transaction, conn)
-					except:
-						print("Error occurs when saving transaction into db.")
-						continue
+				#for transaction in transactions:
+				try:
+					Database.createTransaction(transactions, conn)
+				except:
+					print("Error occurs when saving transaction into db.")
+					continue
 				print("createTranTime:", time.time()-t)
 #lurcury.main()	
 #getBlockNumber

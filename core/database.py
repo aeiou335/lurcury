@@ -58,16 +58,16 @@ class Database():
 		#balanceDB = db.DB("trie/balanceDB")
 		try:
 			if transaction['type'] == "btc":
-				print("btc")
+				#print("btc")
 				address = Key_c.bitcoinaddress(transaction["publicKey"])
 			elif transaction['type'] == "btcc":
-				print("btcc")
+				#print("btcc")
 				address = Key_c.bitcoinaddress_compress(transaction["publicKey"])
 			elif transaction['type'] == "eth":
-				print("eth")
+				#print("eth")
 				address = Key_c.ethereumaddress(transaction["publicKey"])
 			else:
-				print("else")
+				#print("else")
 				address = Key_c.address(transaction["publicKey"])
 		except:
 			print("except")
@@ -114,6 +114,7 @@ class Database():
 					return False
 		print(accountData['nonce'], int(transaction['nonce']))
 		if accountData['nonce']+1 != int(transaction['nonce']):
+			print('nonce error')
 			return False
 
 		return True
@@ -127,6 +128,8 @@ class Database():
 		try:
 			if transaction['type'] == "btc":
 				sender = Key_c.bitcoinaddress(transaction["publicKey"])
+			elif transaction['type'] == "btcc":
+                                sender = Key_c.bitcoinaddress_compress(transaction["publicKey"])
 			elif transaction['type'] == "eth":
 				sender = Key_c.ethereumaddress(transaction["publicKey"])
 			else:
@@ -141,6 +144,7 @@ class Database():
 		except:
 			return False
 		#sender part
+		print("sender part")
 		senderAccount['balance']['cic'] -= int(fee)
 		
 		for coin in transaction['out']:
@@ -192,9 +196,9 @@ class Database():
 		#Todo: Transaction Trie
 		#rootDB = db.DB("trie/rootDB")
 		#transactionDB = db.DB("trie/transactionDB")
-		try:
-			root = db["rootDB"].get(b'TransactionTrie')
-		except:
+		
+		root = db["rootDB"].get(b'TransactionTrie')
+		if root == None:
 			root = ""
 		trie = MPT.MerklePatriciaTrie(db["transactionDB"], root)
 		for transaction in transactions:
@@ -212,9 +216,9 @@ class Database():
 		#Todo: Block Trie
 		#rootDB = db.DB("trie/rootDB")
 		#blockDB = db.DB("trie/blockDB")
-		try:
-			root = db["rootDB"].get(b'BlockTrie')
-		except:
+		
+		root = db["rootDB"].get(b'BlockTrie')
+		if root == None:
 			root = ""
 		print('root:', root)
 		trie = MPT.MerklePatriciaTrie(db["blockDB"], root)

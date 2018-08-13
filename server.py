@@ -168,7 +168,7 @@ class Server_run():
     def run(db):
         from http.server import HTTPServer
         handler = handlerwithdb(db)
-        server = HTTPServer(("192.168.51.201", 9000), handler)
+        server = HTTPServer(("192.168.0.200", 9000), handler)
         print("Starting server, use <Ctrl-C> to stop")
         server.serve_forever()  
 #Server_run.run()

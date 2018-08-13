@@ -68,6 +68,7 @@ def parseEthBlock(info, sql, conn, rpc, _type):
 	if not transactions:
 		return 0
 	for tran in transactions:
+		print(time.time())
 		parseEthTran(conn, tran, rpc, _type)
 
 
@@ -134,7 +135,7 @@ def parseBtcBlock(info, sql, conn):
 def main():
 	sql,conn = pysql.sqlcon('192.168.51.11','bc_developer','d!tRv36B','BlockChain')
 	readBtcBlock = 0
-	readEthBlock = 0
+	readEthBlock = 6114000
 	readBybBlock = 0
 	ethRPC = ethbybRPC("https://mainnet.infura.io/")
 	bybRPC = ethbybRPC("http://10.0.7.16:9500")
@@ -152,12 +153,14 @@ def main():
 		if readBtcBlock+5 >= currBtcBlock and readEthBlock+5 >= currEthBlock:
 			time.sleep(60)
 			continue
-		"""
+		
 		while readEthBlock+5 < currEthBlock:
+			t = time.time()
+			print(t)
 			info = json.loads(ethRPC.getBlockbyNum(readEthBlock))
 			parseEthBlock(info["result"], sql, conn, ethRPC, "eth")
 			readEthBlock += 1
-			print("readEthBlock:", readEthBlock)
+			print("readEthBlock:", readEthBlock, "time:", time.time()-t)
 		"""
 		while readBybBlock+5 < currBybBlock:
 			info = json.loads(bybRPC.getBlockbyNum(readBybBlock))
@@ -169,6 +172,7 @@ def main():
 			parseBtcBlock(info["result"], sql, conn)
 			readBtcBlock += 1
 			print("readBtcBlock:", readBtcBlock)
+		"""
 	"""
 	que = queue.Queue()
 	for i in range(500000,500101):

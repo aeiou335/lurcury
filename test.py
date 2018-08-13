@@ -9,6 +9,7 @@ from run import lurcury
 import time
 from top2 import *
 from init_genesis import clearAllDB, init_account, init_transaction
+from btc_relay import bitcoinInfo
 if __name__ == '__main__':
     db = plyvel.DB('testdb/', create_if_missing=True)
     con = config.config()
@@ -53,24 +54,23 @@ def servermain():
         top["testdb"].put(st, st)
         print(top["testdb"].get(st))
     """
-def topmain():
-    top2.test1(top)
-    #for x in range(0, 1000000):
-    print(top["run"])
+def btcrelaymain():
+    bitcoinInfo.blockTransaction(top)
 
 def runmain():
     for x in range(0, 1000000):
         print(top["run"])
 
 print(time.time())
+
 t1 = threading.Thread(target=lurcurymain)
 t1.start()
 
 t2 = threading.Thread(target=servermain)
 t2.start()
 
-#t3 = threading.Thread(target=topmain)
-#t3.start()
+t3 = threading.Thread(target=btcrelaymain)
+t3.start()
 #t4 = threading.Thread(target=runmain)
 #t4.start()
 
