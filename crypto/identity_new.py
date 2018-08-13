@@ -40,17 +40,16 @@
 
 '''
 import os
-import time
 import hashlib
 import base58
 import ecdsa
 import binascii
-import struct
 from six import b
 from fastecdsa import asn1 as fasn1
 from fastecdsa import point as fpoint
 from fastecdsa import ecdsa as fecdsa
 from fastecdsa import curve as fcurve
+
 
 class identity():
     """ 
@@ -93,7 +92,6 @@ class identity():
         if pk == None:
             assert wiff is not None, "no keys given!"
             privkey = cls._wif2priv(wiff)
-            #privkey = binascii.hexlify(privkey)
         else:
             privkey = binascii.unhexlify(pk)
         verkey = cls._priv2verkey(privkey)
@@ -133,34 +131,6 @@ class identity():
             print("error!! key length neither 130 nor 128")
         addr = cls._pub2addr(pb_comp,main=main)      
         return str(addr, 'ascii')
-#not used anymore    
-    '''
-    @classmethod
-    def priv2signkey(cls, priv=None, wif=None):
-        pk = b(priv) if isinstance(priv,str) else priv
-        wiff = b(wif) if isinstance(wif,str) else wif
-        if pk == None:
-            assert wiff is not None, "no keys given!"
-            privkey = cls._wif2priv(wiff)
-        else:
-            privkey = binascii.unhexlify(pk)
-        p = cls._priv2signkey(privkey)
-        return p.to_string()
-    '''
-#not used anymore
-    '''
-    @classmethod
-    def priv2verkey(cls, priv=None, wif=None):
-        pk = b(priv) if isinstance(priv,str) else priv
-        wiff = b(wif) if isinstance(wif,str) else wif
-        if pk == None:
-            assert wiff is not None, "no keys given!"
-            privkey = cls._wif2priv(wiff)
-        else:
-            privkey = binascii.unhexlify(pk)
-        v = cls._priv2verkey(privkey)
-        return v.to_string()
-    '''
 
     @classmethod
     def compress_pub(cls, key):
@@ -200,30 +170,29 @@ class identity():
         else:
             privkey = binascii.unhexlify(pk)
         s = cls.priv2pemlong(privkey)
+        
+        order = 'FFFFFFFF FFFFFFFF FFFFFFFF FFFFFFFE BAAEDCE6 AF48A03B BFD25E8C D0364141'
         (r, s) = fecdsa.sign(data, s, fcurve.secp256k1)
-        return str(r) + str(s)
+        signed = ecdsa.util.sigencode_der(r,s,order)
+        return str(binascii.hexlify(signed), 'ascii')
 
             
     @classmethod
     def verifydata(cls, pub=None, verkey=None, sigdata=None, origdata=None):
-        #origdata = b(origdata)
-        #verkey = binascii.unhexlify(verkey)[1:] #new
-        #return vkey.verify(sigdata, origdata)
         assert sigdata is not None, "no signed data given!"
         assert origdata is not None, "no original data given!"
         if pub is not None:
             verkey = cls.pub2vkey(pub)
-        l = len(sigdata)
-        sigdata1 = int(sigdata[:int(l/2)])
-        sigdata2 = int(sigdata[int(l/2):])
-        return fecdsa.verify((sigdata1,sigdata2), origdata, verkey, fcurve.secp256k1)
-        #return fecdsa.verify(sigdata, origdata, verkey, fcurve.secp256k1)
+        
+        sigdata = binascii.unhexlify(sigdata)
+        order = 'FFFFFFFF FFFFFFFF FFFFFFFF FFFFFFFE BAAEDCE6 AF48A03B BFD25E8C D0364141'
+        r,s = ecdsa.util.sigdecode_der(sigdata, order)
+        return fecdsa.verify((r,s), origdata, verkey, fcurve.secp256k1) 
 
 
 ################## PRIVATE FUNCTIONS ###########################
     @staticmethod
     def priv2pemlong(priv):
-        #k = binascii.unhexlify(priv)       #for sign
         skey = ecdsa.SigningKey.from_string(priv,curve=ecdsa.SECP256k1)
         skey = skey.to_pem()
         d = b("").join([l.strip() for l in skey.split(b("\n")) if l and not l.startswith(b("-----"))])
@@ -289,7 +258,7 @@ class identity():
     @staticmethod
     def _priv2wif(key, main=True, compress=False):
         def enc(key, ad, c):
-            key = ad + key + c #binascii.hexlify(key) + c
+            key = ad + key + c
             hash_key = binascii.unhexlify(key)
             checksum = hashlib.sha256(hashlib.sha256(hash_key).digest()).digest()[:4]
             key = key + binascii.hexlify(checksum)
@@ -304,100 +273,6 @@ class identity():
     def _wif2priv(wif):
         ad = base58.b58decode_check(wif)
         if str(wif,'ascii')[0]=='K' or str(wif,'ascii')[0]=='L':
-            #print('Compressed wif!')
-            #return binascii.hexlify(ad[1:-1])
             return ad[1:-1]
         else:
-            #print('Not Compressed wif!')
-            #return binascii.hexlify(ad[1:])
             return ad[1:]
-
-
-
-## TESTS ##
-priv = '164C0EA5314F63D2BF5FD7DCD387E66ABD0B0DB360032A9E2232E71E51F8565A'
-wif1 = '5JdFN2jJvC9bCuN4F9i93RkDqBDBqcyinpzBRmnW8xXiXsnGmHT'
-wif2 = 'L1uyy5qTuGrVXrmrsvHWHgVzW9kKdrp27wBC7Vs6nZDTF2BRUVwy'
-pub = identity.priv2pub(priv=priv)
-
-# test priv2wif
-w = identity.priv2wif(priv)
-print("testing priv2wif:", w)
-# test priv2pub
-print("testing priv2pub with priv:", identity.priv2pub(priv=priv))
-print("testing priv2pub with wif:", identity.priv2pub(wif=w))
-# test priv2pub_compressed
-print("testing priv2pub_compress with priv:", identity.priv2pub_compress(priv=priv))
-print("testing priv2pub_compress with wif:", identity.priv2pub_compress(wif=w))
-# test priv2addr
-print("testing priv2addr with priv:", identity.priv2addr(priv=priv))
-print("testing priv2addr with wif:", identity.priv2addr(wif=w))
-# test priv2addr_compressed
-print("testing priv2addr_compress with priv:", identity.priv2addr_compress(priv=priv))
-print("testing priv2addr_compress with w:", identity.priv2addr_compress(wif=w))
-# test pub2addr
-print("testing pub2addr with 0x04:", identity.pub2addr(pub))
-print("testing pub2addr without 0x04:", identity.pub2addr(pub[2:]))
-# test pub2addr_compressed
-print("testing pub2addr_compress with 0x04:", identity.pub2addr_compress(pub))
-print("testing pub2addr_compress without 0x04:", identity.pub2addr_compress(pub[2:]))
-
-# test priv2wif
-p = identity.wif2priv(wif2)
-print("testing wif2priv compress:", p)
-w = '5JsyQainyFU5CXJsGcdpRArcggbHTUbfmcqXcTUfU62v56VK5La'
-p2 = identity.wif2priv(w)
-print("testing wif2priv not-comp:", p2)
-pub = identity.priv2pub(wif=w)
-# test priv2pub
-print("testing priv2pub with priv:", identity.priv2pub(priv=p2))
-print("testing priv2pub with wif:", identity.priv2pub(wif=w))
-# test priv2pub_compressed
-print("testing priv2pub_compress with priv:", identity.priv2pub_compress(priv=p2))
-print("testing priv2pub_compress with wif:", identity.priv2pub_compress(wif=w))
-# test priv2addr
-print("testing priv2addr with priv:", identity.priv2addr(priv=p2))
-print("testing priv2addr with wif:", identity.priv2addr(wif=w))
-# test priv2addr_compressed
-print("testing priv2addr_compress with priv:", identity.priv2addr_compress(priv=p2))
-print("testing priv2addr_compress with w:", identity.priv2addr_compress(wif=w))
-# test pub2addr
-print("testing pub2addr with 0x04:", identity.pub2addr(pub))
-print("testing pub2addr without 0x04:", identity.pub2addr(pub[2:]))
-# test pub2addr_compressed
-print("testing pub2addr_compress with 0x04:", identity.pub2addr_compress(pub))
-print("testing pub2addr_compress without 0x04:", identity.pub2addr_compress(pub[2:]))
-
-
-data = "I want to go to disneyland."
-w = identity.priv2wif(priv)
-p = identity.wif2priv(w)
-print("original priv:",priv)
-print("priv2wif :",w)
-print("back to priv:",p)
-
-start_time = time.time()
-vk = identity.priv2pub(priv=priv)
-vk = identity.priv2pub(wif=w)
-end_time = time.time()
-print("priv2pub, time elapsed: %f" %(end_time-start_time))
-
-start_time = time.time()
-signed1 = identity.signdata(data=data, wif=w)
-end_time = time.time()
-print("Sign, time elapsed: %f" %(end_time-start_time))
-
-start_time = time.time()
-signed2 = identity.signdata(data=data, priv=priv)
-end_time = time.time()
-print("Sign, time elapsed: %f" %(end_time-start_time))
-
-start_time = time.time()
-result = identity.verifydata(sigdata=signed1, origdata=data, pub=vk)
-end_time = time.time()
-print("Result: %s, time elapsed: %f" %(result, end_time-start_time))
-
-start_time = time.time()
-result = identity.verifydata(sigdata=signed2, origdata=data, pub=vk)
-end_time = time.time()
-print("Result: %s, time elapsed: %f" %(result, end_time-start_time))
