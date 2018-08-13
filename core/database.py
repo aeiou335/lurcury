@@ -129,7 +129,7 @@ class Database():
 			if transaction['type'] == "btc":
 				sender = Key_c.bitcoinaddress(transaction["publicKey"])
 			elif transaction['type'] == "btcc":
-                                sender = Key_c.bitcoinaddress_compress(transaction["publicKey"])
+				sender = Key_c.bitcoinaddress_compress(transaction["publicKey"])
 			elif transaction['type'] == "eth":
 				sender = Key_c.ethereumaddress(transaction["publicKey"])
 			else:
@@ -248,7 +248,7 @@ class Database():
 			return ""
 		return pickle.loads(block)
 
-	def getBlock(_hash):
+	def getBlock(_hash, db):
 		try:
 			root = db["rootDB"].get(b"BlockTrie")
 		except:
@@ -257,11 +257,18 @@ class Database():
 		value = trie.search(_hash)
 		return value
 
-	def getTransaction(_hash):
+	def getTransaction(_hash, db):
 		try:
 			root = db["rootDB"].get(b"TransactionTrie")
 		except:
 			root = ""
 		trie = MPT.MerklePatriciaTrie(db["transactionDB"], root)
 		value = trie.search(_hash)
+		return value
+	
+	def getAccount(address, db):
+		try:
+			value = pickle.loads(db["balanceDB"].get(param.encode()))
+		except:
+			value = {"address": address, "balance":{"cic":0}, "nonce":0}
 		return value
