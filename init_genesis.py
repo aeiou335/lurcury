@@ -35,16 +35,16 @@ def clearAllDB(db):
 	db["configDB"].deleteAll()
 	"""
 def init_account(db):
-	mikeAccount = {"address":'cx8e954b8209951c23b7d92bf91acb7a4ea582faaa', "balance":defaultdict(int), "nonce":0}
+	mikeAccount = {"address":'cx8e954b8209951c23b7d92bf91acb7a4ea582faaa', "balance":defaultdict(int), "nonce":0, "transactions":[]}
 	mikeAccount['balance']['cic'] = 5000000000000000000000000000
 	mikeAccount['balance']['btr'] = 5000000000000000000000000000
 	db["balanceDB"].put('cx8e954b8209951c23b7d92bf91acb7a4ea582faaa'.encode(), pickle.dumps(mikeAccount))
-	genesisAccount = {"address":'cxa65cfc9af6b7daae5811836e1b49c8d2570c9387', "balance":defaultdict(int), "nonce":0}
+	genesisAccount = {"address":'cxa65cfc9af6b7daae5811836e1b49c8d2570c9387', "balance":defaultdict(int), "nonce":0, "transactions":[]}
 	genesisAccount['balance']['cic'] = 5000000000000000000000000000
 	genesisAccount['balance']['btr'] = 5000000000000000000000000000
 	db["balanceDB"].put('cxa65cfc9af6b7daae5811836e1b49c8d2570c9387'.encode(), pickle.dumps(genesisAccount))
 	feeAddr = config["feeAddress"]
-	feeAccount = {"address": feeAddr, "balance":defaultdict(int), "nonce":0}
+	feeAccount = {"address": feeAddr, "balance":defaultdict(int), "nonce":0, "transactions":[]}
 	feeAccount['balance']['cic'] = 10000000
 	feeAccount['balance']['cry'] = 21000000
 	db["balanceDB"].put(feeAddr.encode(), pickle.dumps(feeAccount))
@@ -53,7 +53,7 @@ def init_account(db):
 
 	CCRNonceKey = config["currNonceCCR"]
 	beginBlockNum = config["currBTCRelayBlock"]
-	db["configDB"].put(CCRNonceKey.encode(), pickle.dumps(1))
+	db["configDB"].put(CCRNonceKey.encode(), pickle.dumps(0))
 	db["configDB"].put(beginBlockNum.encode(), pickle.dumps(536724))
 #key = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(38))
 
@@ -97,8 +97,8 @@ def init_transaction(db):
 	transaction = {
 		'fee': '100',
 		'to': feeAddr,
-		'out': {'btr':'1000000'},
-		'nonce': '1',
+		'out': {'cic':'1000'},
+		'nonce': '0',
 		'type': 'btcc',
 		'input': '90f4btr2100000000000000'
 	}

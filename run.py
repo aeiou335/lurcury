@@ -36,7 +36,7 @@ class lurcury:
 						#print("verifyTranTime:", time.time()-t)
 						t = time.time()
 						#balance verify and nonce
-						if not Database.verifyBalanceAndNonce(pendingTran, conn):
+						if not Database.verifyBalanceAndNonce(pendingTran, conn, "run"):
 							#print("verify balance and nonce error")
 							continue
 						#print("verifyBalnceTime:", time.time()-t)
@@ -54,6 +54,7 @@ class lurcury:
 				key = '97ddae0f3a25b92268175400149d65d6887b9cefaf28ea2c078e05cdc15a3c0a'
 				#print('parent', parentBlock)
 				newBlock = Block.newBlock_POA(newBlock, parentBlock, key)
+				print("block number:", newBlock["blockNumber"])
 				#print("newBlock_POATime:", time.time()-t)
 				t = time.time()
 				try:
@@ -61,6 +62,7 @@ class lurcury:
 				except:
 					#print('Error occurs when saving block into db.')
 					continue
+				currentBlockNum += 1
 				#print("createBlockTime:", time.time()-t)
 				t = time.time()
 				if len(transactions) == 0:
@@ -71,6 +73,8 @@ class lurcury:
 				except:
 					#print("Error occurs when saving transaction into db.")
 					continue
+				
+				
 				#print("createTranTime:", time.time()-t)
 #lurcury.main()	
 #getBlockNumber

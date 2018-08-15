@@ -95,7 +95,6 @@ class bitcoinInfo:
 					if flag:
 						print(flag, value, address)
 						print("++++++++++++++++++currNonce:",currNonce)
-						currNonce -= 1
 						transaction = {
 							"to": "cx"+address,
 							"out": {"btr": str(int(float(value)*10e7))},
@@ -104,7 +103,7 @@ class bitcoinInfo:
 						    "type":"cic",#"btcc",
 						    "input":""
 						}
-						currNonce += 2
+						currNonce += 1
 						transaction = Transaction.newTransaction(transaction, key)
 						print("transaction:", transaction)
 						transactions.append(transaction)

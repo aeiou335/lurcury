@@ -14,12 +14,7 @@ from config import *
 
 def handlerwithdb(db):	
 	#print("db",db)
-	class Handler(BaseHTTPRequestHandler):
-		#print("db",db)
-		#def __init__(self, *args, **kargs):
-		#	super(Handler, self).__init__(*args, **kargs)
-			
-			
+	class Handler(BaseHTTPRequestHandler):	
 		def do_OPTIONS(self):
 			self.send_response(200, "ok")
 			self.send_header('Access-Control-Allow-Credentials', 'true')
@@ -103,9 +98,9 @@ def handlerwithdb(db):
 				if required <= transaction.keys():
 					if Database.pendingTransaction(transaction, db):
 						print(transaction)
-						value = True
+						value = True, transaction["txid"]
 					else:
-						value = False
+						value = False, "Cannot add into pending transaction!"
 				else:
 					print("second error")
 					value = False
@@ -132,7 +127,7 @@ class Server_run():
     def run(db):
         from http.server import HTTPServer
         handler = handlerwithdb(db)
-        server = HTTPServer(("192.168.51.201", 9000), handler)
+        server = HTTPServer(("192.168.0.200", 9000), handler)
         print("Starting server, use <Ctrl-C> to stop")
         server.serve_forever()  
 #Server_run.run()
