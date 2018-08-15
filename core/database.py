@@ -183,6 +183,7 @@ class Database():
 			receiverAccount = {"address":receiver,"balance":defaultdict(int),"nonce":0, "transactions":[]}
 		#print("receiverAccount:", receiverAccount)
 		#receiver part
+		transaction["from"] = sender
 		receiverAccount["transactions"].append(transaction)
 		for coin in transaction['out']:
 			receiverAccount['balance'][coin] += int(transaction['out'][coin])		
