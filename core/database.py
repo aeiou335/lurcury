@@ -13,6 +13,7 @@ sys.path.append("crypto")
 #from crypto import basic
 from basic import *
 #from crypto import basic
+import time
 
 class Database():
 	def pendingTransaction(newTransaction, db):
@@ -184,6 +185,7 @@ class Database():
 		#print("receiverAccount:", receiverAccount)
 		#receiver part
 		transaction["from"] = sender
+		transaction["timestamp"] = time.time()
 		receiverAccount["transactions"].append(transaction)
 		for coin in transaction['out']:
 			receiverAccount['balance'][coin] += int(transaction['out'][coin])		
