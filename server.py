@@ -98,7 +98,7 @@ def handlerwithdb(db):
 				if required <= transaction.keys():
 					if Database.pendingTransaction(transaction, db):
 						print(transaction)
-						value = True, transaction["txid"]
+						value = True
 					else:
 						value = False, "Cannot add into pending transaction!"
 				else:
@@ -120,6 +120,7 @@ def handlerwithdb(db):
 			post_return = {}
 			post_return['method'] = method
 			post_return['result'] = value
+			post_return['txid'] = transaction["txid"]
 			self.wfile.write(json.dumps(post_return).encode())
 	return Handler	
 
