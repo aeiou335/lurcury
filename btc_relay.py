@@ -44,11 +44,11 @@ class bitcoinInfo:
 					if transaction["scriptPubKey"]["asm"][:9] == "OP_RETURN" and transaction["scriptPubKey"]["asm"][10:34] == addressKey and value != 0:
 						address = transaction["scriptPubKey"]["asm"][34:]
 						flag = True
-						#print(flag, vlaue, address)
+						print("params:",flag, vlaue, address)
 						return flag, value, address
 
 				if transaction["scriptPubKey"]["addresses"][0] == ourAccount:
-					print(transactions)
+					print("params",transactions)
 					value += transaction['value']
 					"""
 					txid = t["vin"][0]["txid"]
@@ -80,24 +80,31 @@ class bitcoinInfo:
 				continue
 			else:
 				currNonce = pickle.loads(db["configDB"].get(currNonceKey.encode()))
+				#currNonce = currNonce -2
+				#if currNonce < 0:
+					#currNonce = 0
+				#currNonce = currNonce+6
+				print("2currNonce:",currNonce)
 				r = bitcoinRPC().blockInfo(currBlockRead)
 				z = json.loads(r) 
 				transactions = []
-				key = "4f269e92bde3b00f9b963d665630445b297e2e8d29987b1d50d1e8785372e393"
+				key = "14ea887907e1c00d905f61712b48ccc43cb02e452662ac8cd8a0e2d13845e5a2"
 				for y in z["result"]["tx"]: 
 					#print(y)
 					flag, value, address = bitcoinInfo.parseTransaction(y) 
 					if flag:
 						print(flag, value, address)
-						currNonce += 1
+						print("++++++++++++++++++currNonce:",currNonce)
+						currNonce -= 1
 						transaction = {
-							"to": address,
+							"to": "cx"+address,
 							"out": {"btr": str(int(float(value)*10e7))},
 							"nonce":str(currNonce),
 						    "fee":"10",
-						    "type":"btcc",
+						    "type":"cic",#"btcc",
 						    "input":""
 						}
+						currNonce += 2
 						transaction = Transaction.newTransaction(transaction, key)
 						print("transaction:", transaction)
 						transactions.append(transaction)

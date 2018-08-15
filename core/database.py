@@ -113,7 +113,8 @@ class Database():
 			if name in currName:
 					return False
 		print(accountData['nonce'], int(transaction['nonce']))
-		if accountData['nonce']+1 != int(transaction['nonce']):
+		#if accountData['nonce']+1 != int(transaction['nonce']):
+		if accountData['nonce'] != int(transaction['nonce']):
 			print('nonce error')
 			return False
 
@@ -268,7 +269,7 @@ class Database():
 	
 	def getAccount(address, db):
 		try:
-			value = pickle.loads(db["balanceDB"].get(param.encode()))
+			value = pickle.loads(db["balanceDB"].get(address.encode()))
 		except:
 			value = {"address": address, "balance":{"cic":0}, "nonce":0}
 		return value

@@ -28,11 +28,11 @@ if __name__ == '__main__':
             "pt":[]
           }
     top["testdb"].put(b'cat', b'dog')
-    print("Reset DB")
+    #print("Reset DB")
     clearAllDB(top)
-    print("Init Account")
+    #print("Init Account")
     init_account(top)
-    print("Init Transaction")
+    #print("Init Transaction")
     init_transaction(top)    
 
 def lurcurymain():
