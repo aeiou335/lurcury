@@ -48,6 +48,8 @@ class lurcury:
 						t = time.time()
 					newBlock = Block.pushTransactionToArray(newBlock, pendingTran)
 					transactions.append(pendingTran)
+				if len(transactions) == 0:
+					continue
 				t = time.time()
 				#print("newBlock:", newBlock)
 				parentBlock = Database.getBlockByID(currentBlockNum-1, conn)
@@ -65,8 +67,7 @@ class lurcury:
 				currentBlockNum += 1
 				#print("createBlockTime:", time.time()-t)
 				t = time.time()
-				if len(transactions) == 0:
-					continue
+				
 				#for transaction in transactions:
 				try:
 					Database.createTransaction(transactions, conn)
