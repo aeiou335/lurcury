@@ -236,26 +236,25 @@ class Database():
 		#Return current block number
 		#rootDB = db.DB("trie/rootDB")
 		#blockDB = db.DB("trie/blockDB")
-		try:
-			root = db["rootDB"].get(b"BlockTrie")
-			print(root)
-		except:
+		
+		root = db["rootDB"].get(b"BlockTrie")
+		if root == None:
 			root = ""
 		trie = MPT.MerklePatriciaTrie(db["blockDB"], root)
 		return trie.id
 
 	def getBlockByID(idx, db):
 		#blockDB = db.DB("trie/blockDB")
-		try:
-			block = db["blockDB"].get(str(idx).encode())
-		except:
+		
+		block = db["blockDB"].get(str(idx).encode())
+		if block == None:
 			return ""
 		return pickle.loads(block)
 
 	def getBlock(_hash, db):
-		try:
-			root = db["rootDB"].get(b"BlockTrie")
-		except:
+	
+		root = db["rootDB"].get(b"BlockTrie")
+		if root == None:
 			root = ""
 		try:
 			trie = MPT.MerklePatriciaTrie(db["blockDB"], root)
@@ -265,9 +264,9 @@ class Database():
 		return value
 
 	def getTransaction(_hash, db):
-		try:
-			root = db["rootDB"].get(b"TransactionTrie")
-		except:
+		
+		root = db["rootDB"].get(b"TransactionTrie")
+		if root == None:
 			root = ""
 		try:
 			trie = MPT.MerklePatriciaTrie(db["transactionDB"], root)
