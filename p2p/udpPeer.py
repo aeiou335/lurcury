@@ -3,8 +3,8 @@ import time
 import gevent
 import json
 from gevent.queue import Queue as Queue
-from p2p import Packet
-from udpProtocol import Protocol
+from p2p.p2p import Packet
+from p2p.udpProtocol import Protocol
 import errno
 import socket
 import gevent.socket

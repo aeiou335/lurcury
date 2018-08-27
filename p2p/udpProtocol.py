@@ -4,7 +4,7 @@ import time
 import gevent
 from gevent.queue import Queue as Queue
 import pickle
-from p2p import Packet
+from p2p.p2p import Packet
 
 class Protocol(gevent.Greenlet):
     'Handler of incoming and outgoing messages. Takes care of packaging packets and signature verification.'

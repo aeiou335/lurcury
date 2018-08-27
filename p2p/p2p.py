@@ -1,5 +1,5 @@
 import time
-import crypto
+import p2p.crypto as crypto
 import pickle
     
 class Packet():

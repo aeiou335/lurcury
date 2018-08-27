@@ -28,13 +28,13 @@ pm_configs = {
 }
 
 class Node:
-    def __init__(self, pm_configs, tp):
+    def __init__(self, pm_configs, tp, db):
         self.stopped = True
         self.priv_wif = pm_configs['node']['wif']
         pm_configs['node']['ID'] = crypto.priv2addr(priv=pm_configs['node']['privkey'], wif=pm_configs['node']['wif'])
         self.nodeID = pm_configs['node']['ID']
         self.pm = PeerManager(pm_configs)
-        #self.db = Database()
+        self.db = db
         self.key = None
         self.mgrs = dict(stat=statusMgr(self),db=dbMgr(self),consensus=consensusMgr(self))
 
@@ -82,7 +82,6 @@ class statusMgr(gevent.Greenlet):
     def __init__(self,node):
         gevent.Greenlet.__init__(self)
         self.pm = node.pm
-        #self.status = None # to be modified
         self.status = {"method":"00","ver":"sue", "id":"","genesisHash":"0","blockNumber":"0"}
         self.status['id'] = node.nodeID
         self.is_stopped = False
@@ -111,7 +110,7 @@ class statusMgr(gevent.Greenlet):
 class dbMgr(gevent.Greenlet):
     def __init__(self, node):
         gevent.Greenlet.__init__(self)
-        #self.db = node.db
+        self.db = node.db
         self.pm = node.pm
         self.is_stopped = False
 
@@ -131,7 +130,8 @@ class dbMgr(gevent.Greenlet):
                 request = message["data"]
                 print("Method: get 02, return 03")
                 print("Hash: %s\nMax Block: %s\n" %(request['hash'], request['maxBlock']))
-                result = {"method": "03", "hash": ["this","is","test"]} #self.getBlockHashes(int(request['maxBlocks']))
+                result = {"method": "03", "hash": ["this","is","test"]} 
+                #result = self.getBlockHashes(int(request['maxBlocks']))
                 self.pm.send(result, nodeID)
             
             # ReturnBlockHash
@@ -152,7 +152,8 @@ class dbMgr(gevent.Greenlet):
                 request = message["data"]
                 print("Method: get 05, return 06")
                 print("Hash: %s\n" %(request['hash']))
-                result = {"method": "06", "blocks": [{"a":"aa","b":"bb","c":"cc"},{"d":"dd","e":"ee","f":"ff"}]} #self.getBlocks(request['hash'])
+                result = {"method": "06", "blocks": [{"a":"aa","b":"bb","c":"cc"},{"d":"dd","e":"ee","f":"ff"}]} 
+                #result = self.getBlocks(request['hash'])
                 self.pm.send(result, nodeID)
             
             # ReturnBlock
@@ -164,7 +165,7 @@ class dbMgr(gevent.Greenlet):
                 print("Block: %s\n" %(request['blocks']))
                 
                 for _b in request['blocks']:    
-                    #Database().createBlock(_b)  
+                    #self.db['blockDB'].createBlock(_b)  
                     #result = {"method": "07", "hash": _b['transactions']}
                     hsh = [v for v in _b.values()]
                     result = {"method": "07", "hash": hsh}
@@ -177,7 +178,8 @@ class dbMgr(gevent.Greenlet):
                 request = message["data"]
                 print("Method: get 07, return 09")
                 print("Hash: %s\n" %(request['hash']))
-                result = {"method": "09", "transactions": [{"ha":"haha"},{"hee":"heehee"},{"huh":"huhuh"}]} #self.getTrans(request['transactions']) # txid->transactions
+                result = {"method": "09", "transactions": [{"ha":"haha"},{"hee":"heehee"},{"huh":"huhuh"}]} 
+                #result = self.getTrans(request['hash']) # txid->transactions
                 self.pm.send(result, nodeID)
             
             # ReturnTransaction
@@ -188,15 +190,15 @@ class dbMgr(gevent.Greenlet):
                 print("Transactions: %s\n" %(request['transactions']))
                 print("Test ended.")
                 #for _t in request['transactions']:
-                #    Database().createTransaction(_t)
+                #    self.db['transactionDB'].createTransaction(_t)
 
             gevent.sleep()
-    '''
+    
     def getBlockHashes(self, maxBlocks):
-        blockNum = self.db.getBlockNumber(self.pm)
+        blockNum = self.db['blockDB'].getBlockNumber(self.pm)           #
         blocks = []
         for num in range(maxBlocks, blockNum):
-            block = self.db.getBlockByID(num)
+            block = self.db['blockDB'].getBlockByID(num)                #
             blocks.append(block["hash"])
         result = {"method": "03", "hash": blocks}
         return result
@@ -204,23 +206,23 @@ class dbMgr(gevent.Greenlet):
     def getBlocks(self, blockHash):
         result = {}; res = []
         for _hash in blockHash:
-            res.append(self.db.getBlock(_hash))
+            res.append(self.db['blockDB'].getBlock(_hash))              #
         result = {"method": "06", "blocks": res}
         return result
 
     def getTrans(self, tranHash):
         result = {}; res = []
         for _hash in tranHash:
-            res.append(self.db.getTransaction(_hash))
+            res.append(self.db['transactionDB'].getTransaction(_hash))  #
         result = {"method": "09", "transactions": res}
         return result
-    '''
+    
 
 class consensusMgr(gevent.Greenlet):
     def __init__(self, node):
         gevent.Greenlet.__init__(self)
         self.pm = node.pm
-        #self.db = node.db
+        #self.db = node.db       #
         self.key = node.priv_wif
         self.threshold = 1 # min consensus threshold
         self.is_stopped = False

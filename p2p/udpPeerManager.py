@@ -6,9 +6,9 @@ import pickle
 import gevent
 from gevent.queue import Queue as Queue
 from gevent.server import DatagramServer as Server
-import crypto
-from udpPeer import Peer
-from p2p import Packet
+import p2p.crypto as crypto
+from p2p.udpPeer import Peer
+from p2p.p2p import Packet
 
 
 class State(enum.Enum):
