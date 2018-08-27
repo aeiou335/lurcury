@@ -130,8 +130,8 @@ class dbMgr(gevent.Greenlet):
                 request = message["data"]
                 print("Method: get 02, return 03")
                 print("Hash: %s\nMax Block: %s\n" %(request['hash'], request['maxBlock']))
-                result = {"method": "03", "hash": ["this","is","test"]} 
-                #result = self.getBlockHashes(int(request['maxBlocks']))
+                #result = {"method": "03", "hash": ["this","is","test"]} 
+                result = self.getBlockHashes(int(request['maxBlocks']))
                 self.pm.send(result, nodeID)
             
             # ReturnBlockHash
@@ -152,8 +152,8 @@ class dbMgr(gevent.Greenlet):
                 request = message["data"]
                 print("Method: get 05, return 06")
                 print("Hash: %s\n" %(request['hash']))
-                result = {"method": "06", "blocks": [{"a":"aa","b":"bb","c":"cc"},{"d":"dd","e":"ee","f":"ff"}]} 
-                #result = self.getBlocks(request['hash'])
+                #result = {"method": "06", "blocks": [{"a":"aa","b":"bb","c":"cc"},{"d":"dd","e":"ee","f":"ff"}]} 
+                result = self.getBlocks(request['hash'])
                 self.pm.send(result, nodeID)
             
             # ReturnBlock
@@ -165,7 +165,7 @@ class dbMgr(gevent.Greenlet):
                 print("Block: %s\n" %(request['blocks']))
                 
                 for _b in request['blocks']:    
-                    #self.db['blockDB'].createBlock(_b)  
+                    Database.createBlock(_b, self.db)  
                     #result = {"method": "07", "hash": _b['transactions']}
                     hsh = [v for v in _b.values()]
                     result = {"method": "07", "hash": hsh}
@@ -178,8 +178,8 @@ class dbMgr(gevent.Greenlet):
                 request = message["data"]
                 print("Method: get 07, return 09")
                 print("Hash: %s\n" %(request['hash']))
-                result = {"method": "09", "transactions": [{"ha":"haha"},{"hee":"heehee"},{"huh":"huhuh"}]} 
-                #result = self.getTrans(request['hash']) # txid->transactions
+                #result = {"method": "09", "transactions": [{"ha":"haha"},{"hee":"heehee"},{"huh":"huhuh"}]} 
+                result = self.getTrans(request['hash']) # txid->transactions
                 self.pm.send(result, nodeID)
             
             # ReturnTransaction
@@ -189,16 +189,16 @@ class dbMgr(gevent.Greenlet):
                 print("Method: get 09")
                 print("Transactions: %s\n" %(request['transactions']))
                 print("Test ended.")
-                #for _t in request['transactions']:
-                #    self.db['transactionDB'].createTransaction(_t)
+                for _t in request['transactions']:
+                    Database.createTransaction(_t, self.db)
 
             gevent.sleep()
     
     def getBlockHashes(self, maxBlocks):
-        blockNum = self.db['blockDB'].getBlockNumber(self.pm)           #
+        blockNum = Database.getBlockNumber(self.db)           #
         blocks = []
         for num in range(maxBlocks, blockNum):
-            block = self.db['blockDB'].getBlockByID(num)                #
+            block = Database.getBlockByID(num, self.db)                #
             blocks.append(block["hash"])
         result = {"method": "03", "hash": blocks}
         return result
@@ -206,14 +206,14 @@ class dbMgr(gevent.Greenlet):
     def getBlocks(self, blockHash):
         result = {}; res = []
         for _hash in blockHash:
-            res.append(self.db['blockDB'].getBlock(_hash))              #
+            res.append(Database.getBlock(_hash, self.db))              #
         result = {"method": "06", "blocks": res}
         return result
 
     def getTrans(self, tranHash):
         result = {}; res = []
         for _hash in tranHash:
-            res.append(self.db['transactionDB'].getTransaction(_hash))  #
+            res.append(Database.getTransaction(_hash, self.db))  #
         result = {"method": "09", "transactions": res}
         return result
     
