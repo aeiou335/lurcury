@@ -6,6 +6,7 @@ from crypto.basic import *#Hash_c
 from config import config
 import time
 
+
 class Code:
     def transactionEncode(transaction):
         coins = ['cic', 'now']
@@ -78,11 +79,14 @@ class Code:
         return re
 
 class Transaction:
-    def newTransaction(transactionData,key):
+    def newTransaction(newtransaction,privkey):
+        transactionData = {}
+        for key, value in newtransaction.items():
+            transactionData[key] = value
         en = Code.transactionEncode(transactionData)
-        sign = signature_c.sign(en,key)
+        sign = signature_c.sign(en,privkey)
         transactionData["sign"] = sign
-        transactionData["publicKey"] = Key_c.publicKey(key)
+        transactionData["publicKey"] = Key_c.publicKey(privkey)
         #print('txid:',Code.txid(transactionData))
         transactionData["txid"] = Code.txid(transactionData)
         #print("top2",Code.txid(transactionData))
@@ -91,8 +95,9 @@ class Transaction:
     def verifyTransaction(transaction):
         #print(transaction)
         en = Code.transactionEncode(transaction)
+        #print("tran:", transaction)
         try:
-            signature_c.verify(transaction["sign"],en.encode(),transaction["publicKey"])
+            signature_c.verify(transaction["sign"],en,transaction["publicKey"])
         except:
             print("sign error")
             return False
@@ -112,7 +117,7 @@ class Input:
                 if transaction['to'] != config.config()["receiveAddress"]:
                     return False
                 return True
-
+"""
 transaction = {
     #"to":"cxfcb42deca97e4e8339e0b950ba5efa368fe71a55",
     "to":"16yvczqzg526o7q52r9td4sryggmjtpud7",
@@ -144,3 +149,4 @@ print(time.time())
 #print(y)
 #print(Code.transactionDecode("000000000000000000000000000001cxfcb42deca97e4e8339e0b950ba5efa368fe71a55000000000000000000000000000001now000000000000000000000000000100cic000000000000000000000000000010"))
 '''
+"""

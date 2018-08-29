@@ -9,7 +9,7 @@ import sha3
 import base58
 import sys
 sys.path.append("crypto")
-from identity import identity
+from identity_new import identity
 sys.path.append("../")
 from ecdsa import SigningKey, VerifyingKey, NIST256p, SECP256k1
 import time
@@ -54,13 +54,16 @@ class Key_c:
         '''
         #privKey = eth_keys.keys.PrivateKey(binascii.unhexlify(priv))
         #pubKey = privKey.public_key
-
+        """
         signkey = SigningKey.from_string(bytes().fromhex(priv), curve=SECP256k1)
         verkey = signkey.get_verifying_key()
         pubkey = binascii.hexlify(verkey.to_string())
-        return pubkey.decode()
+        """
+        pubkey = identity.priv2pub(priv=priv)
+        return pubkey
     def address(pub):
-        r = "cx"+Hash_c.sha256_string(pub)[24:64]
+        r = "cx"+Hash_c.sha256_string(pub[2:])[24:64]
+        #r = "cx"+identity.pub2addr(pub)
         #r = pub.to_checksum_address()
         return r
     def ethereumaddress(key):
@@ -68,12 +71,10 @@ class Key_c:
         k.update(bytes().fromhex(key))
         return "0x"+k.hexdigest()[24:64]
     def bitcoinaddress(key):
-        unit = identity()
-        return unit.pub2addr(key)
+        return identity.pub2addr(key)
         #return
     def bitcoinaddress_compress(key):
-        unit = identity()
-        return unit.pub2addr_compress(key) 
+        return identity.pub2addr_compress(key) 
     def exp():
         f = Key_c.privateKey()
         f2 = Key_c.publicKey(f)
@@ -83,17 +84,24 @@ class Key_c:
 
 class signature_c:
     def sign(data,priv):
+        """
         priv = SigningKey.from_string(bytes().fromhex(priv),curve=SECP256k1)
         data = b(str(data))
         sig = priv.sign(data)
-        return binascii.hexlify(sig).decode()
+        """
+        sig = identity.signdata(priv=priv, data=data)
+        return sig
+        #return binascii.hexlify(sig).decode()
     def verify(signData,rawData,pub):
+        """
         print("init",time.time())
         signData = binascii.unhexlify(signData)
         print("very",time.time())
         pub = VerifyingKey.from_string(bytes().fromhex(pub),curve=SECP256k1)
         print("end",time.time())
-        return pub.verify(signData, rawData)
+        """
+    
+        return identity.verifydata(sigdata=signData, origdata=rawData, pub=pub)
     def exp():
         x = signature.sign("blahblah","24ac4b12bbb37e5b1e59830c7e376f1963b9cacb4233fa53")
         h = signature.verify(x,b("blahblah"),key.publicKey("24ac4b12bbb37e5b1e59830c7e376f1963b9cacb4233fa53"))
