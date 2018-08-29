@@ -32,7 +32,8 @@ class Database():
 			return False
 		if int(newTransaction['fee']) >= int(requireFee):
 			if Database.verifyBalanceAndNonce(newTransaction, db, "server"): 
-				db["pt"].append(newTransaction)
+				n = int(newTransaction["publicKey"][-1],16)
+				db["pt"][n//2].append(newTransaction)
 				return True
 			else:
 				return False
@@ -79,7 +80,7 @@ class Database():
 		#address = 'ilwOop'
 		try:
 			accountData = pickle.loads(db["balanceDB"].get(address.encode()))
-			#print('account:', int(accountData['balance']['cic']))
+			#print('account:', int(accountData['balance']['cic']))	
 		except:
 			#print('accounterror')
 			return False
@@ -114,10 +115,14 @@ class Database():
 					return False
 			if name in currName:
 					return False
-		print(accountData['nonce'], int(transaction['nonce']))
+		#print(accountData['nonce'], int(transaction['nonce']))
+		#print("accountData:",accountData, "transaction:",transaction)
 		#if accountData['nonce']+1 != int(transaction['nonce']):
 		if _type == "run":
+			
 			if accountData['nonce'] != int(transaction['nonce']):
+				#print("acountdata:", accountData)
+				#print("transaction:", transaction)
 				print('nonce error')
 				return False
 		elif _type == "server":
@@ -220,8 +225,11 @@ class Database():
 		#Todo: Block Trie
 		#rootDB = db.DB("trie/rootDB")
 		#blockDB = db.DB("trie/blockDB")
-		
+		print(";;;;;;;;;;;")
+		print("rrrrrr", db["rootDB"].get(b'BlockTrie'))
 		root = db["rootDB"].get(b'BlockTrie')
+		print("=== ====== ========== ==========")
+		print("curr root:", root)
 		if root == None:
 			root = ""
 		print('root:', root)
@@ -231,12 +239,14 @@ class Database():
 		new_root = trie.root_hash()
 		#print('new root:', new_root)
 		db["rootDB"].put(b'BlockTrie', new_root)
+		print("------ - -  - - - - - - - -- - - - --  --")
+		print("rootttttt",db["rootDB"].get(b'BlockTrie'))
 
 	def getBlockNumber(db):
 		#Return current block number
 		#rootDB = db.DB("trie/rootDB")
 		#blockDB = db.DB("trie/blockDB")
-		
+		print("a;sldkfj:", db["rootDB"].get(b"BlockTrie"))
 		root = db["rootDB"].get(b"BlockTrie")
 		if root == None:
 			root = ""
