@@ -5,6 +5,7 @@ import p2p.crypto as crypto
 import plyvel 
 from config import config
 from init_genesis import clearAllDB, init_account, init_transaction
+from run import lurcury
 
 pm_configs = {
     'node' : {'privkey':None,'wif':None},
@@ -13,7 +14,7 @@ pm_configs = {
         'min_peers':1,
         'max_peers':10,
         'num_workers':1,
-        'num_queue':15,
+        'num_queue':10,
         'listen_port':'',
         'listen_host':'127.0.0.1',
         'timeout':15.0,
@@ -36,6 +37,7 @@ def main(argv, top):
         print("Configs for node 1")
         pm_configs['node']['wif'] = pv1
         pm_configs['p2p']['listen_port'] = '10000'
+        pm_configs['p2p']['bootstrap_nodes'] = []
         test_node = Node(pm_configs,pb2,top)
         try:
             test_node.start()
@@ -81,4 +83,5 @@ if __name__ == '__main__':
     init_account(top)
     #print("Init Transaction")
     init_transaction(top) 
+    lurcury.main(top)
     main(sys.argv, top)

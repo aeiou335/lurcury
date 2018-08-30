@@ -77,7 +77,7 @@ class Peer(gevent.Greenlet):
                     raise e 
             
             try:
-                message, addr = self.socket.recvfrom(4096)
+                message, addr = self.socket.recvfrom(8192)
                 self.peerAddr = addr
             except gevent.socket.error as e:
                 print('Network error: %s' %e.strerror)
