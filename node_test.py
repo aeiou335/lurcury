@@ -22,6 +22,11 @@ pm_configs = {
         'discovery_delay':0.1
     }
 }
+configs = {
+    'pm_configs': pm_configs,
+    'consensusThreshold': 1
+}
+
 pv1 = '5JdFN2jJvC9bCuN4F9i93RkDqBDBqcyinpzBRmnW8xXiXsnGmHT'
 pv2 = '5HueCGU8rMjxEXxiPuD5BDku4MkFqeZyd4dZ1jvhTVqvbTLvyTJ'
 pb1 = crypto.priv2addr(wif=pv1)
@@ -35,10 +40,10 @@ def main(argv, top):
     testnum = argv[1]
     if testnum == "node1":
         print("Configs for node 1")
-        pm_configs['node']['wif'] = pv1
-        pm_configs['p2p']['listen_port'] = '10000'
-        pm_configs['p2p']['bootstrap_nodes'] = []
-        test_node = Node(pm_configs,pb2,top)
+        configs['pm_configs']['node']['wif'] = pv1
+        configs['pm_configs']['p2p']['listen_port'] = '10000'
+        configs['pm_configs']['p2p']['bootstrap_nodes'] = []
+        test_node = Node(configs,pb2,top)
         try:
             test_node.start()
         except KeyboardInterrupt:
@@ -46,10 +51,10 @@ def main(argv, top):
 
     elif testnum == "node2":
         print("Configs for node 2")
-        pm_configs['node']['wif'] = pv2
-        pm_configs['p2p']['listen_port'] = '15000'
-        pm_configs['p2p']['bootstrap_nodes'] = [peer1]
-        test_node = Node(pm_configs,pb1,top)
+        configs['pm_configs']['node']['wif'] = pv2
+        configs['pm_configs']['p2p']['listen_port'] = '15000'
+        configs['pm_configs']['p2p']['bootstrap_nodes'] = [peer1]
+        test_node = Node(configs,pb1,top)
         try:
             test_node.start()
         except KeyboardInterrupt:

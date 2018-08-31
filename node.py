@@ -8,16 +8,16 @@ import p2p.crypto as crypto
 
 
 class Node:
-    def __init__(self, pm_configs, tp, db):
+    def __init__(self, configs, tp, db):
         self.stopped = True
         self.status = {"method":"00","ver":"sue", "id":"","genesisHash":"AC66D1839E1B79F1FB22181B70237F1E45E3D95A512A0790C216328CA2631674","blockNumber":"3", "maxBlock":"3"}
-        self.priv_wif = pm_configs['node']['wif']
-        pm_configs['node']['ID'] = crypto.priv2addr(priv=pm_configs['node']['privkey'], wif=pm_configs['node']['wif'])
-        self.nodeID = pm_configs['node']['ID']
-        self.pm = PeerManager(pm_configs)
+        self.priv_wif = configs['pm_configs']['node']['wif']
+        configs['pm_configs']['node']['ID'] = crypto.priv2addr(priv=configs['pm_configs']['node']['privkey'], wif=configs['pm_configs']['node']['wif'])
+        self.nodeID = configs['pm_configs']['node']['ID']
+        self.pm = PeerManager(configs['pm_configs'])
         self.db = db
         self.key = None
-        self.mgrs = dict(stat=statusMgr(self), db=dbMgr(self), consensus=consensusMgr(self))
+        self.mgrs = dict(stat=statusMgr(self), db=dbMgr(self), consensus=consensusMgr(self, configs['consensusThreshold']))
         
         # variables for testing....
         self.test_peer = tp # testing pubID for testing dbmgr, remove after test
@@ -196,14 +196,13 @@ class dbMgr(gevent.Greenlet):
     
 
 class consensusMgr(gevent.Greenlet):
-    def __init__(self, node):
+    def __init__(self, node, conThresh):
         gevent.Greenlet.__init__(self)
         self.pm = node.pm
         self.db = node.db       
         self.key = node.priv_wif
         self.pubkey = crypto.priv2pub(wif=self.key)
-        # min consensus threshold --> TODO: set in node.pm_config['node']['consensusThreshold']
-        self.threshold = 1 
+        self.threshold = conThresh 
         self.is_stopped = False
         self.temp = {} 
     

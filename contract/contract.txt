@@ -1,0 +1,28 @@
+	toj = 1
+	class hop:
+		def top():
+			tttt = 1
+			tttt += 1
+			top = "abc"
+			toj = 2
+			return locals()
+		def go():
+			toj = 5
+			return locals()
+		#print(locals())
+	class dog:
+		def cat():
+			aaaa = 1
+			aaaa += 1
+			job = "abc"
+			toj = 2
+			return locals()
+		def fish():
+			toj = 5
+			return locals()
+		#print(locals())
+	def min(a,b):
+		if a>b:
+			return b
+		else:
+			return a
